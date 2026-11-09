@@ -1,0 +1,48 @@
+{% extends "admin/_layout.html" %}
+{% block title %}Pengaturan{% endblock %}
+{% block admin_subtitle %}Konfigurasi situs, biaya, dan integrasi.{% endblock %}
+
+{% block admin_content %}
+<div class="card">
+  <h3>Nilai konfigurasi</h3>
+  <p class="small muted">
+    Perubahan langsung berlaku untuk seluruh aplikasi. Beberapa kunci bersifat
+    sensitif (mis. <span class="mono">webhook_secret</span>).
+  </p>
+
+  <form method="post">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <div class="table-wrap mt-2">
+      <table class="data">
+        <thead><tr><th>Kunci</th><th>Nilai</th><th>Diperbarui</th></tr></thead>
+        <tbody>
+          {% for row in rows %}
+            <tr>
+              <td class="mono small">{{ row.key }}</td>
+              <td>
+                <input class="form-control mono" name="{{ row.key }}" value="{{ row.value or '' }}">
+              </td>
+              <td class="small muted">{{ row.updated_at|tanggal }}</td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    <div class="form-actions">
+      <button class="btn btn--primary btn--sm" type="submit">Simpan pengaturan</button>
+    </div>
+  </form>
+
+  {% if lab_policy.level_is_patched %}
+    <div class="notice mt-2">
+      Hanya kunci operasional berikut yang dapat diubah lewat panel:
+      <span class="mono">{{ safe_keys|join(', ') }}</span>.
+    </div>
+  {% elif lab_policy.is_hard %}
+    <div class="notice notice--warning mt-2">
+      <strong>Catatan lab:</strong> pembatasan dilakukan dengan daftar hitam pada
+      awalan nama kunci, bukan daftar putih. Kunci baru tetap dapat disisipkan.
+    </div>
+  {% endif %}
+</div>
+{% endblock %}

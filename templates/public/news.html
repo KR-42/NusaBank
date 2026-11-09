@@ -1,0 +1,86 @@
+{% extends "base.html" %}
+{% block title %}Berita &amp; Promo{% endblock %}
+
+{% block content %}
+<section class="section-tight">
+  <div class="container">
+    <div class="page-head">
+      <div>
+        <span class="kicker">Informasi</span>
+        <h1>Berita &amp; promo</h1>
+        <p class="muted">Kabar terbaru seputar layanan, produk, dan keamanan.</p>
+      </div>
+    </div>
+
+    {% if reflected_q %}
+      <div class="notice">
+        Hasil pencarian untuk:
+        {% if xss_reflected %}
+          {# VULN: xss_reflected — the search term is rendered without escaping. #}
+          <strong>{{ reflected_q|safe }}</strong>
+        {% else %}
+          {# FIX: Jinja autoescape renders the term as inert text. #}
+          <strong>{{ reflected_q }}</strong>
+        {% endif %}
+      </div>
+    {% endif %}
+
+    <form method="get" class="news-filter card">
+      <div class="form-group">
+        <label class="form-label" for="q">Cari artikel</label>
+        <input class="form-control" id="q" name="q" value="{{ q }}"
+               placeholder="promo, keamanan, deposito…">
+      </div>
+      <div class="form-group">
+        <label class="form-label" for="kategori">Kategori</label>
+        <select class="form-control" id="kategori" name="kategori">
+          <option value="">Semua kategori</option>
+          {% for item in categories %}
+            <option value="{{ item }}" {% if item == category %}selected{% endif %}>{{ item }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="form-actions flex gap-1">
+        <button class="btn btn--primary btn--sm" type="submit">Cari</button>
+        <a class="btn btn--ghost btn--sm" href="{{ url_for('public.news') }}">Reset</a>
+      </div>
+    </form>
+
+    <div class="article-list mt-3">
+      {% for article in page_data['items'] %}
+        <a class="article-card" href="{{ url_for('public.news_detail', slug=article.slug) }}">
+          <div class="article-card__meta">
+            <span class="badge badge--gold">{{ article.category }}</span>
+            <span class="small muted">{{ article.published_at|tanggal }}</span>
+          </div>
+          <h3>{{ article.title }}</h3>
+          <p>{{ article.excerpt }}</p>
+          <span class="small muted">{{ article.views }} kali dibaca</span>
+        </a>
+      {% else %}
+        <div class="card text-center">
+          <p class="mb-0 muted">Tidak ada artikel yang cocok dengan pencarian Anda.</p>
+        </div>
+      {% endfor %}
+    </div>
+
+    {% if page_data.pages > 1 %}
+      <nav class="pager mt-2" aria-label="Navigasi halaman">
+        {% if page_data.page > 1 %}
+          <a class="btn btn--ghost btn--sm"
+             href="{{ url_for('public.news', q=q, kategori=category, page=page_data.page - 1) }}">
+            ← Sebelumnya
+          </a>
+        {% endif %}
+        <span class="small muted">Halaman {{ page_data.page }} dari {{ page_data.pages }}</span>
+        {% if page_data.page < page_data.pages %}
+          <a class="btn btn--ghost btn--sm"
+             href="{{ url_for('public.news', q=q, kategori=category, page=page_data.page + 1) }}">
+            Berikutnya →
+          </a>
+        {% endif %}
+      </nav>
+    {% endif %}
+  </div>
+</section>
+{% endblock %}

@@ -1,0 +1,141 @@
+{% extends "base.html" %}
+{% block title %}Profil{% endblock %}
+
+{% block content %}
+<section class="section-tight">
+  <div class="container">
+    <div class="page-head">
+      <div>
+        <h1>Profil Saya</h1>
+        <p class="muted">Data diri, foto, dan status verifikasi.</p>
+      </div>
+      <div class="pill-row">
+        <a class="btn btn--primary btn--sm" href="{{ url_for('dashboard.profile_edit') }}">Ubah profil</a>
+        <a class="btn btn--ghost btn--sm" href="{{ url_for('auth.change_password') }}">Ganti password</a>
+      </div>
+    </div>
+
+    <div class="grid grid--2">
+      <div class="card">
+        <div class="flex items-center gap-2">
+          {% if active_user.photo %}
+            <img class="avatar" src="{{ url_for('uploads.raw_file', name='photos/' ~ active_user.photo) }}"
+                 alt="Foto profil">
+          {% else %}
+            <div class="avatar avatar--placeholder">{{ active_user.full_name[:1] }}</div>
+          {% endif %}
+          <div>
+            <h3 class="mb-0">{{ active_user.full_name }}</h3>
+            <p class="small muted mb-0">@{{ active_user.username }}</p>
+          </div>
+        </div>
+
+        <dl class="detail-grid mt-3">
+          <div><dt>Email</dt><dd>{{ active_user.email }}</dd></div>
+          <div><dt>Telepon</dt><dd>{{ active_user.phone or '-' }}</dd></div>
+          <div><dt>Alamat</dt><dd>{{ active_user.address or '-' }}</dd></div>
+          <div>
+            <dt>Status KYC</dt>
+            <dd>
+              {% set kyc = active_user.kyc_status %}
+              <span class="badge {{ 'badge--green' if kyc == 'verified' else ('badge--red' if kyc == 'rejected' else 'badge--amber') }}">
+                {{ kyc }}
+              </span>
+            </dd>
+          </div>
+          <div><dt>Bergabung</dt><dd>{{ active_user.created_at|tanggal }}</dd></div>
+          <div><dt>Login terakhir</dt><dd>{{ active_user.last_login_at|tanggal }}</dd></div>
+        </dl>
+
+        <form method="post" action="{{ url_for('dashboard.profile_photo') }}"
+              enctype="multipart/form-data" class="mt-2">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+          <div class="form-group">
+            <label class="form-label" for="photo">Foto profil</label>
+            <input class="form-control" id="photo" name="photo" type="file">
+          </div>
+          <button class="btn btn--ghost btn--sm" type="submit">Unggah foto</button>
+        </form>
+      </div>
+
+      <div>
+        <div class="card">
+          <h3>Rekening</h3>
+          <div class="table-wrap">
+            <table class="data">
+              <thead><tr><th>No. Rekening</th><th>Tipe</th><th class="text-right">Saldo</th></tr></thead>
+              <tbody>
+                {% for account in accounts %}
+                  <tr>
+                    <td class="mono">{{ account.account_number }}</td>
+                    <td>{{ account.label }}</td>
+                    <td class="text-right amount--in">{{ account.balance|rupiah }}</td>
+                  </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="card mt-2">
+          <h3>PIN transaksi</h3>
+          <form method="post" action="{{ url_for('dashboard.change_pin') }}" class="mt-1">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <div class="form-row">
+              <div class="form-group">
+                <label class="form-label" for="current_pin">PIN saat ini</label>
+                <input class="form-control" id="current_pin" name="current_pin"
+                       inputmode="numeric" maxlength="6">
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="new_pin">PIN baru</label>
+                <input class="form-control" id="new_pin" name="new_pin"
+                       inputmode="numeric" maxlength="6">
+              </div>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="confirm_pin">Ulangi PIN baru</label>
+              <input class="form-control" id="confirm_pin" name="confirm_pin"
+                     inputmode="numeric" maxlength="6">
+            </div>
+            <button class="btn btn--ghost btn--sm" type="submit">Simpan PIN</button>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <div class="card mt-3">
+      <div class="flex justify-between items-center">
+        <h3 class="mb-0">Dokumen KYC</h3>
+        <a class="btn btn--primary btn--sm" href="{{ url_for('uploads.kyc_upload') }}">Unggah dokumen</a>
+      </div>
+      <div class="table-wrap mt-2">
+        <table class="data">
+          <thead>
+            <tr><th>Jenis</th><th>Nama berkas</th><th>Status</th><th>Diunggah</th><th></th></tr>
+          </thead>
+          <tbody>
+            {% for doc in kyc_docs %}
+              <tr>
+                <td>{{ doc.doc_type|upper }}</td>
+                <td class="small">{{ doc.original_name }}</td>
+                <td>
+                  <span class="badge {{ 'badge--green' if doc.status == 'verified' else ('badge--red' if doc.status == 'rejected' else 'badge--amber') }}">
+                    {{ doc.status }}
+                  </span>
+                </td>
+                <td class="small muted">{{ doc.uploaded_at|tanggal }}</td>
+                <td class="text-right">
+                  <a class="small" href="{{ url_for('uploads.kyc_download', doc_id=doc.id) }}">Unduh</a>
+                </td>
+              </tr>
+            {% else %}
+              <tr><td colspan="5" class="muted">Belum ada dokumen KYC.</td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %}

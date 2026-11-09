@@ -1,0 +1,69 @@
+{% extends "base.html" %}
+{% block title %}Detail Klaim {{ claim.claim_no }}{% endblock %}
+
+{% block content %}
+<section class="section-tight">
+  <div class="container">
+    <div class="page-head">
+      <div>
+        <h1>Klaim {{ claim.claim_no }}</h1>
+        <p class="muted">{{ claim.policy_no }} · {{ 'Jiwa' if claim.product == 'jiwa' else 'Kendaraan' }}</p>
+      </div>
+      <a class="btn btn--ghost btn--sm" href="{{ url_for('claims.index') }}">Kembali</a>
+    </div>
+
+    <div class="grid grid--2">
+      <div class="card">
+        <dl class="detail-grid">
+          <div><dt>Status</dt>
+            <dd>
+              <span class="badge {{ 'badge--green' if claim.status == 'approved' else ('badge--red' if claim.status == 'rejected' else 'badge--amber') }}">
+                {{ claim.status }}
+              </span>
+            </dd>
+          </div>
+          <div><dt>Nominal</dt><dd class="balance-xl">{{ claim.amount|rupiah }}</dd></div>
+          <div><dt>Pemohon</dt><dd>{{ claim.full_name }} (@{{ claim.username }})</dd></div>
+          <div><dt>Diajukan</dt><dd>{{ claim.created_at }}</dd></div>
+          <div><dt>Nilai pertanggungan</dt><dd>{{ claim.coverage|rupiah }}</dd></div>
+          <div><dt>Ditinjau</dt>
+            <dd>{{ claim.reviewed_at or 'Belum ditinjau' }}</dd>
+          </div>
+          <div class="detail-grid__full">
+            <dt>Kronologi</dt>
+            <dd>{{ claim.description or '-' }}</dd>
+          </div>
+          {% if internal_note_visible %}
+            <div class="detail-grid__full">
+              {# VULN: internal_note_exposure — the admin-only note is rendered
+                 to the customer on easy/medium. #}
+              <dt>Catatan admin</dt>
+              <dd>{{ claim.admin_note or 'Belum ada catatan.' }}</dd>
+            </div>
+          {% endif %}
+        </dl>
+
+        {% if claim.attachment %}
+          <a class="btn btn--ghost btn--sm mt-1"
+             href="{{ url_for('claims.claim_attachment', claim_id=claim.id) }}">
+            Unduh lampiran
+          </a>
+        {% endif %}
+      </div>
+
+      <div class="card">
+        <h3>Status pengajuan</h3>
+        <ol class="steps">
+          <li class="{{ 'is-done' if claim.status in ('approved', 'rejected') else 'is-active' }}">Klaim diajukan</li>
+          <li class="{{ 'is-done' if claim.status in ('approved', 'rejected') else '' }}">Verifikasi dokumen</li>
+          <li class="{{ 'is-done' if claim.status == 'approved' else '' }}">Keputusan &amp; pencairan</li>
+        </ol>
+        <div class="notice mt-2">
+          Butuh bantuan? <a href="{{ url_for('tickets.create') }}">Buat tiket dukungan</a>
+          dan sertakan nomor klaim ini.
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %}

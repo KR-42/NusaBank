@@ -1,0 +1,87 @@
+{% extends "base.html" %}
+{% block title %}FAQ{% endblock %}
+
+{% block content %}
+<section class="page-hero">
+  <div class="container">
+    <span class="kicker">Pusat Bantuan</span>
+    <h1>Pertanyaan yang sering diajukan</h1>
+    <p class="page-hero__lead">
+      Jawaban singkat untuk pertanyaan umum seputar rekening, transaksi, dan keamanan.
+    </p>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container container--narrow">
+    <div class="faq-filter">
+      <label class="form-label" for="faq-search">Cari pertanyaan</label>
+      <input class="form-control" id="faq-search" type="search"
+             placeholder="misal: PIN, limit, deposito" data-faq-search>
+      <p class="form-hint" data-faq-count></p>
+    </div>
+
+    <div class="faq-list" data-faq-list>
+      <details class="faq-item" open>
+        <summary>Bagaimana cara membuka rekening?</summary>
+        <p>Klik “Buka Rekening Online” pada halaman utama, lengkapi data diri, lalu unggah
+           dokumen KYC (KTP dan selfie). Verifikasi biasanya selesai dalam satu hari kerja.</p>
+      </details>
+      <details class="faq-item">
+        <summary>Apakah ada biaya administrasi bulanan?</summary>
+        <p>Tabungan Nusa Prima bebas biaya administrasi bulanan. Biaya hanya berlaku untuk
+           transfer antar bank sesuai tarif yang berlaku (simulasi: Rp 2.500 per transaksi).</p>
+      </details>
+      <details class="faq-item">
+        <summary>Berapa limit transfer harian?</summary>
+        <p>Limit default adalah Rp 25.000.000 per hari. Perubahan limit dapat diajukan
+           melalui cabang dengan verifikasi identitas tambahan.</p>
+      </details>
+      <details class="faq-item">
+        <summary>Bagaimana jika PIN saya terkunci?</summary>
+        <p>Ajukan tiket bantuan melalui menu Bantuan di dashboard. Tim layanan akan
+           memverifikasi identitas Anda sebelum melakukan reset PIN.</p>
+      </details>
+      <details class="faq-item">
+        <summary>Bagaimana cara mengajukan klaim asuransi?</summary>
+        <p>Buka menu Asuransi, pilih polis yang aktif, lalu isi formulir klaim dan lampirkan
+           dokumen pendukung. Status klaim dapat dipantau dari halaman yang sama.</p>
+      </details>
+      <details class="faq-item">
+        <summary>Apakah NusaBank terhubung ke e-wallet?</summary>
+        <p>Ya. Anda dapat menambahkan URL webhook mitra e-wallet melalui menu E-Wallet agar
+           notifikasi transaksi dikirim otomatis ke sistem mitra.</p>
+      </details>
+      <details class="faq-item">
+        <summary>Apakah tersedia API untuk integrasi?</summary>
+        <p>Tersedia REST API pada <span class="mono">/api/v1/</span> dengan autentikasi token.
+           Dokumentasi lengkap dapat dibaca di <a href="{{ url_for('api.docs') }}">halaman API</a>.</p>
+      </details>
+      <details class="faq-item">
+        <summary>Bagaimana perlindungan data nasabah?</summary>
+        <p>Data disimpan dengan enkripsi dan akses dibatasi berdasarkan peran. Pada
+           lingkungan latihan ini seluruh data bersifat fiktif.</p>
+      </details>
+      <details class="faq-item">
+        <summary>Apakah deposito bisa dicairkan sebelum jatuh tempo?</summary>
+        <p>Pencairan dini dimungkinkan dengan penalti sesuai ketentuan produk. Hubungi
+           layanan pelanggan untuk perhitungannya.</p>
+      </details>
+      <details class="faq-item">
+        <summary>Bagaimana melaporkan transaksi mencurigakan?</summary>
+        <p>Segera buka tiket dengan kategori “Keamanan” atau hubungi 1500-800. Kami akan
+           membekukan sementara akses transaksi selama investigasi.</p>
+      </details>
+    </div>
+
+    <div class="card mt-3">
+      <h3>Belum menemukan jawaban?</h3>
+      <p class="small muted">Kirim pertanyaan melalui formulir kontak atau buka tiket bantuan.</p>
+      <div class="flex gap-1">
+        <a class="btn btn--primary btn--sm" href="{{ url_for('public.contact') }}">Hubungi kami</a>
+        <a class="btn btn--ghost btn--sm" href="{{ url_for('tickets.index') }}">Buka tiket</a>
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %}

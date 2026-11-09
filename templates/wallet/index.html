@@ -1,0 +1,136 @@
+{% extends "base.html" %}
+{% block title %}E-Wallet{% endblock %}
+
+{% block content %}
+<section class="section-tight">
+  <div class="container">
+    <div class="page-head">
+      <div>
+        <h1>Hubungkan E-Wallet</h1>
+        <p class="muted">Sinkronkan mutasi NusaBank ke dompet digital mitra lewat webhook.</p>
+      </div>
+      <a class="btn btn--ghost btn--sm" href="{{ url_for('dashboard.index') }}">Kembali</a>
+    </div>
+
+    <div class="grid grid--2">
+      <div class="card">
+        <h3>Tambah koneksi</h3>
+        <p class="small muted">
+          Masukkan URL endpoint yang akan dipanggil server NusaBank setiap kali ada
+          notifikasi dompet. Untuk demo, gunakan halaman mitra di lab ini:
+          <span class="mono">{{ partner_url }}</span>
+        </p>
+        <form method="post" novalidate>
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+          <div class="form-group">
+            <label class="form-label" for="label">Nama dompet</label>
+            <input class="form-control" id="label" name="label" maxlength="60"
+                   placeholder="Contoh: DompetKu">
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="url">URL callback (webhook)</label>
+            <input class="form-control mono" id="url" name="url" required
+                   placeholder="https://partner.example.com/nusabank/callback">
+            <p class="form-hint">
+              Server akan memanggil URL ini untuk memverifikasi koneksi
+              (<code>wallet.verify</code>).
+            </p>
+          </div>
+          <div class="form-actions">
+            <button class="btn btn--primary" type="submit">Hubungkan</button>
+          </div>
+        </form>
+      </div>
+
+      <div class="card">
+        <h3>Koneksi aktif</h3>
+        {% for hook in hooks %}
+          <div class="hook">
+            <div class="hook__head">
+              <strong>{{ hook.label }}</strong>
+              <span class="badge {{ 'badge--green' if hook.last_status and hook.last_status < 400 else ('badge--red' if hook.last_status else 'badge--amber') }}">
+                {{ hook.last_status or 'belum dipanggil' }}
+              </span>
+            </div>
+            <p class="mono small">{{ hook.url }}</p>
+            <p class="small muted mb-0">Dipanggil: {{ hook.last_called_at|tanggal }}</p>
+            <div class="pill-row mt-1">
+              <form method="post" action="{{ url_for('webhook.test', webhook_id=hook.id) }}">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <button class="btn btn--ghost btn--sm" type="submit">Tes ulang</button>
+              </form>
+              <form method="post" action="{{ url_for('webhook.delete', webhook_id=hook.id) }}"
+                    data-confirm="Hapus koneksi {{ hook.label }}?">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <button class="btn btn--ghost btn--sm" type="submit">Hapus</button>
+              </form>
+            </div>
+          </div>
+        {% else %}
+          <p class="muted small">Belum ada dompet yang terhubung.</p>
+        {% endfor %}
+      </div>
+    </div>
+
+    {% if result %}
+      <div class="card">
+        <h3>Respons endpoint</h3>
+        <p class="small muted">
+          URL: <span class="mono">{{ result.url }}</span><br>
+          Status: <strong>{{ result.status or 'gagal' }}</strong>
+        </p>
+        <pre class="code-block">{{ result.body }}</pre>
+      </div>
+    {% endif %}
+
+    <div class="card">
+      <h3>Log webhook</h3>
+      <div class="table-wrap mt-1">
+        <table class="data">
+          <thead>
+            <tr><th>Waktu</th><th>URL</th><th>Status</th><th>Respons</th></tr>
+          </thead>
+          <tbody>
+            {% for log in logs %}
+              <tr>
+                <td class="small muted">{{ log.created_at|tanggal }}</td>
+                <td class="mono small">{{ log.url }}</td>
+                <td>
+                  <span class="badge {{ 'badge--green' if log.status and log.status < 400 else 'badge--red' }}">
+                    {{ log.status or 'gagal' }}
+                  </span>
+                </td>
+                <td class="small mono">{{ (log.response or '')[:120] }}</td>
+              </tr>
+            {% else %}
+              <tr><td colspan="4" class="muted">Belum ada aktivitas webhook.</td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="notice mt-3">
+      <strong>Catatan integrasi:</strong> endpoint webhook dipanggil langsung dari server
+      NusaBank. Pastikan URL hanya mengarah ke layanan mitra yang tepercaya.
+    </div>
+
+    {% if lab_policy.is_hard or lab_policy.level_is_patched %}
+      <div class="card mt-3">
+        <h3>Kebijakan URL pada level ini</h3>
+        <p class="small muted">
+          Level <strong>{{ lab_level }}</strong> hanya mengizinkan host mitra yang
+          terdaftar di <span class="mono">settings.webhook_allowlist</span>, atau host
+          yang mengarah ke alamat IP publik. Alamat loopback/private seperti
+          <span class="mono">127.0.0.1</span> ditolak.
+        </p>
+        <p class="small muted mb-0">
+          Untuk latihan di dalam lab, tambahkan host mitra ke allowlist lewat panel
+          admin (<span class="mono">/admin/settings</span>) atau langsung di database,
+          misalnya <span class="mono">partner.nusabank.example.com,127.0.0.1</span>.
+        </p>
+      </div>
+    {% endif %}
+  </div>
+</section>
+{% endblock %}

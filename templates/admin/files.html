@@ -1,0 +1,37 @@
+{% extends "admin/_layout.html" %}
+{% block title %}Berkas{% endblock %}
+{% block admin_subtitle %}Berkas yang tersimpan di direktori unggahan.{% endblock %}
+
+{% block admin_content %}
+<div class="card">
+  <h3>Pencarian berkas</h3>
+  <form method="get" class="flex gap-1">
+    <input class="form-control mono" name="name" value="{{ name }}"
+           placeholder="kyc/nama-berkas.pdf">
+    <button class="btn btn--primary btn--sm" type="submit">Buka</button>
+  </form>
+  <p class="form-hint">
+    Path relatif terhadap direktori unggahan. Gunakan tombol di bawah untuk
+    membuka berkas hasil daftar.
+  </p>
+
+  <div class="table-wrap mt-2">
+    <table class="data">
+      <thead><tr><th>Berkas</th><th class="text-right">Ukuran</th><th></th></tr></thead>
+      <tbody>
+        {% for entry in entries %}
+          <tr>
+            <td class="mono small">{{ entry.name }}</td>
+            <td class="text-right small">{{ entry.size }} byte</td>
+            <td class="text-right">
+              <a class="small" href="{{ url_for('admin.files', name=entry.name) }}">Unduh</a>
+            </td>
+          </tr>
+        {% else %}
+          <tr><td colspan="3" class="muted">Belum ada berkas.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

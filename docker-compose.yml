@@ -1,0 +1,48 @@
+# NusaBank Lab — docker-compose.yml
+#
+# FOR LOCAL PENETRATION-TESTING ONLY.
+# This application is intentionally vulnerable. DO NOT EXPOSE TO THE INTERNET.
+#
+#   docker compose up --build          # start (default LAB_LEVEL=medium)
+#   LAB_LEVEL=easy docker compose up   # change difficulty
+#   docker compose down                # stop
+#
+# Rebuild the database:  docker compose down && rm db/nusabank.db && docker compose up
+
+services:
+  web:
+    build: .
+    image: nusabank:lab
+    restart: unless-stopped
+    environment:
+      LAB_LEVEL: "${LAB_LEVEL:-medium}"
+      NUSABANK_DB: /app/db/nusabank.db
+      NUSABANK_UPLOADS: /app/uploads
+      NUSABANK_SECRET: "${NUSABANK_SECRET:-nusabank-dev-secret-change-me}"
+      # Set to 1 to leak Python tracebacks on 500 (easy/medium only)
+      NUSABANK_DEBUG: "${NUSABANK_DEBUG:-0}"
+    ports:
+      # Bind to the loopback interface only — never 0.0.0.0.
+      - "127.0.0.1:8080:8080"
+    volumes:
+      - ./db:/app/db
+      - ./uploads:/app/uploads
+      - ./data:/app/data
+    read_only: true
+    tmpfs:
+      - /tmp:size=64m
+      - /var/tmp:size=16m
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+    # Keep the container on an isolated bridge network. No outbound internet
+    # is required; internal IPs are reachable from inside the container so the
+    # SSRF exercise (http://127.0.0.1:8080/internal/metadata) works locally.
+    networks:
+      - labnet
+
+networks:
+  labnet:
+    driver: bridge
+    internal: false

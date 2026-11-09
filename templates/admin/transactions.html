@@ -1,0 +1,90 @@
+{% extends "admin/_layout.html" %}
+{% block title %}Transaksi{% endblock %}
+{% block admin_subtitle %}Seluruh mutasi rekening nasabah.{% endblock %}
+
+{% block admin_content %}
+<div class="card">
+  <form method="get">
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label" for="q">Pencarian</label>
+        <input class="form-control" id="q" name="q" value="{{ q }}"
+               placeholder="Deskripsi, lawan transaksi, atau ref no">
+      </div>
+      <div class="form-group">
+        <label class="form-label" for="account">Nomor rekening</label>
+        <input class="form-control mono" id="account" name="account" value="{{ account }}">
+      </div>
+      <div class="form-group">
+        <label class="form-label" for="start">Dari tanggal</label>
+        <input class="form-control" id="start" name="start" type="date" value="{{ start }}">
+      </div>
+      <div class="form-group">
+        <label class="form-label" for="end">Sampai tanggal</label>
+        <input class="form-control" id="end" name="end" type="date" value="{{ end }}">
+      </div>
+    </div>
+    <div class="pill-row">
+      <button class="btn btn--primary btn--sm" type="submit">Terapkan filter</button>
+      <a class="btn btn--ghost btn--sm"
+         href="{{ url_for('admin.transactions_export', q=q, account=account, start=start, end=end) }}">Ekspor CSV</a>
+    </div>
+  </form>
+
+  {% if error %}
+    <div class="notice notice--danger mt-2">{{ error }}</div>
+  {% endif %}
+
+  <div class="stat-strip mt-2">
+    <div class="stat"><strong>{{ total_count }}</strong><span>Baris cocok</span></div>
+    <div class="stat"><strong>{{ total_in|rupiah }}</strong><span>Total masuk</span></div>
+    <div class="stat"><strong>{{ total_out|rupiah }}</strong><span>Total keluar</span></div>
+    <div class="stat"><strong>{{ page.pages }}</strong><span>Halaman</span></div>
+  </div>
+
+  <div class="table-wrap mt-2">
+    <table class="data">
+      <thead>
+        <tr><th>Waktu</th><th>Ref</th><th>Rekening / Nasabah</th><th>Tipe</th>
+            <th class="text-right">Nominal</th><th>Keterangan</th></tr>
+      </thead>
+      <tbody>
+        {% for tx in rows %}
+          <tr>
+            <td class="small muted">{{ tx.created_at|tanggal }}</td>
+            <td class="mono small">{{ tx.ref_no }}</td>
+            <td>
+              <span class="mono small">{{ tx.account_number }}</span><br>
+              <span class="small muted">{{ tx.full_name }}</span>
+            </td>
+            <td><span class="badge">{{ tx.tx_type }}</span></td>
+            <td class="text-right {{ 'amount--in' if tx.direction == 'IN' else 'amount--out' }}">
+              {{ '+' if tx.direction == 'IN' else '−' }}{{ tx.amount|rupiah }}
+            </td>
+            <td class="small">
+              {{ tx.description }}<br>
+              <span class="muted">{{ tx.counterparty_name or '' }}</span>
+            </td>
+          </tr>
+        {% else %}
+          <tr><td colspan="6" class="muted">Tidak ada transaksi untuk filter ini.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  {% if page.pages > 1 %}
+    <nav class="pager mt-2" aria-label="Navigasi halaman">
+      {% if page.page > 1 %}
+        <a class="btn btn--ghost btn--sm"
+           href="{{ url_for('admin.transactions', q=q, account=account, start=start, end=end, page=page.page - 1) }}">← Sebelumnya</a>
+      {% endif %}
+      <span class="small muted">Halaman {{ page.page }} dari {{ page.pages }}</span>
+      {% if page.page < page.pages %}
+        <a class="btn btn--ghost btn--sm"
+           href="{{ url_for('admin.transactions', q=q, account=account, start=start, end=end, page=page.page + 1) }}">Berikutnya →</a>
+      {% endif %}
+    </nav>
+  {% endif %}
+</div>
+{% endblock %}

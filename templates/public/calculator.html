@@ -1,0 +1,88 @@
+{% extends "base.html" %}
+{% block title %}Kalkulator Angsuran{% endblock %}
+
+{% block content %}
+<section class="section-tight">
+  <div class="container">
+    <div class="page-head">
+      <div>
+        <span class="kicker">Kalkulator</span>
+        <h1>Simulasi angsuran</h1>
+        <p class="muted">Perkiraan cicilan bulanan dengan bunga tetap (flat).</p>
+      </div>
+      <a class="btn btn--ghost btn--sm" href="{{ url_for('public.products') }}">Lihat produk</a>
+    </div>
+
+    <div class="grid grid--2 calc-grid">
+      <div class="card">
+        <form method="post" novalidate>
+          {# Read-only simulation: nothing is stored, so no CSRF token is sent. #}
+          {# Version marker read by the server's validation gate. #}
+          <input type="hidden" name="form_version" value="v2">
+          {% if lab_policy.is_easy and lab_policy.is_vulnerable('calc_parameter_tampering') %}
+            {# VULN: calc_parameter_tampering — the rate the client posted wins. #}
+            <input type="hidden" name="rate" value="{{ financing[form.produk].rate }}">
+          {% endif %}
+          <div class="form-group">
+            <label class="form-label" for="produk">Jenis pembiayaan</label>
+            <select class="form-control" id="produk" name="produk">
+              {% for slug, product in financing.items() %}
+                <option value="{{ slug }}" {% if form.produk == slug %}selected{% endif %}>
+                  {{ product.label }} — {{ product.rate }}% p.a.
+                </option>
+              {% endfor %}
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="harga">Harga barang (Rp)</label>
+            <input class="form-control" id="harga" name="harga" type="number" min="0"
+                   step="1000" value="{{ form.harga }}" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="dp">Uang muka (Rp)</label>
+            <input class="form-control" id="dp" name="dp" type="number" min="0"
+                   step="1000" value="{{ form.dp }}" required>
+            <p class="form-hint">Umumnya 20–30% dari harga barang.</p>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="tenor">Tenor (bulan)</label>
+            <input class="form-control" id="tenor" name="tenor" type="number" min="1"
+                   max="240" value="{{ form.tenor }}" required>
+          </div>
+          <button class="btn btn--primary" type="submit">Hitung angsuran</button>
+        </form>
+      </div>
+
+      <div class="card calc-result">
+        {% if error %}
+          <div class="notice notice--danger">{{ error }}</div>
+        {% elif result %}
+          <span class="kicker">Perkiraan angsuran</span>
+          <p class="balance-xl">{{ result.installment|rupiah }}</p>
+          <p class="small muted">per bulan selama {{ result.tenor }} bulan</p>
+          <dl class="detail-grid">
+            <dt>Pokok pembiayaan</dt>
+            <dd>{{ result.principal|rupiah }}</dd>
+            <dt>Total bunga</dt>
+            <dd>{{ result.interest|rupiah }}</dd>
+            <dt>Total pembayaran</dt>
+            <dd>{{ result.total|rupiah }}</dd>
+            <dt>Suku bunga</dt>
+            <dd>{{ result.rate }}% p.a.</dd>
+          </dl>
+          <p class="small muted mb-0">
+            Simulasi ini bukan penawaran resmi. Angka final mengikuti analisis kredit.
+          </p>
+        {% else %}
+          <div class="empty-state">
+            <span class="empty-state__icon">∑</span>
+            <h3>Hasil muncul di sini</h3>
+            <p class="muted mb-0">Isi harga, uang muka, dan tenor lalu tekan
+              “Hitung angsuran”.</p>
+          </div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %}

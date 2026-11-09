@@ -1,0 +1,57 @@
+{% extends "admin/_layout.html" %}
+{% block title %}Verifikasi KYC{% endblock %}
+{% block admin_subtitle %}Tinjau dokumen identitas nasabah.{% endblock %}
+
+{% block admin_content %}
+<div class="card">
+  <div class="pill-row">
+    {% for item in statuses %}
+      <a class="btn btn--sm {{ 'btn--primary' if item == status else 'btn--ghost' }}"
+         href="{{ url_for('admin.kyc', status=item) }}">{{ item }}</a>
+    {% endfor %}
+  </div>
+
+  <div class="table-wrap mt-2">
+    <table class="data">
+      <thead>
+        <tr><th>ID</th><th>Nasabah</th><th>Dokumen</th><th>Diunggah</th>
+            <th>Status</th><th>Keputusan</th></tr>
+      </thead>
+      <tbody>
+        {% for doc in rows %}
+          <tr>
+            <td class="mono small">{{ doc.id }}</td>
+            <td>
+              <strong>{{ doc.full_name }}</strong><br>
+              <span class="small muted">{{ doc.username }}</span>
+            </td>
+            <td>
+              {{ doc.doc_type }}<br>
+              <a class="small mono" href="{{ url_for('admin.kyc_file', doc_id=doc.id) }}">{{ doc.original_name }}</a>
+              <br><span class="small muted">{{ doc.mime_type }} · {{ doc.size_bytes }} byte</span>
+            </td>
+            <td class="small muted">{{ doc.uploaded_at|tanggal }}</td>
+            <td>
+              <span class="badge {{ 'badge--green' if doc.status == 'verified' else ('badge--red' if doc.status == 'rejected' else 'badge--amber') }}">
+                {{ doc.status }}
+              </span>
+              {% if doc.note %}<br><span class="small muted">{{ doc.note }}</span>{% endif %}
+            </td>
+            <td>
+              <form method="post" action="{{ url_for('admin.kyc_review', doc_id=doc.id) }}" class="flex gap-1">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <input type="hidden" name="status" value="{{ status }}">
+                <input class="form-control" name="note" placeholder="Catatan" style="min-width:150px">
+                <button class="btn btn--primary btn--sm" type="submit" name="decision" value="verified">Setujui</button>
+                <button class="btn btn--ghost btn--sm" type="submit" name="decision" value="rejected">Tolak</button>
+              </form>
+            </td>
+          </tr>
+        {% else %}
+          <tr><td colspan="6" class="muted">Tidak ada dokumen dengan status {{ status }}.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

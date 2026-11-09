@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+{% block title %}Masuk Administrator{% endblock %}
+
+{% block content %}
+<section class="section-tight">
+  <div class="container">
+    <div class="auth-shell">
+      <div class="auth-card">
+        <h1>Panel Administrator</h1>
+        <p class="muted small">
+          Halaman masuk terpisah untuk staf back-office NusaBank. Sesi administrator
+          tidak sama dengan sesi nasabah.
+        </p>
+
+        <form method="post" novalidate>
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+          <div class="form-group">
+            <label class="form-label" for="username">Username admin</label>
+            <input class="form-control" id="username" name="username" autocomplete="username"
+                   value="{{ username or '' }}" required autofocus>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="password">Password</label>
+            <input class="form-control" id="password" name="password" type="password"
+                   autocomplete="current-password" required>
+          </div>
+          <div class="form-actions">
+            <button class="btn btn--primary" type="submit">Masuk ke panel</button>
+          </div>
+        </form>
+
+        <p class="small muted mt-2 mb-0">
+          Kredensial demo ada di <span class="mono">docs/CREDENTIALS.md</span>.
+          Nasabah biasa masuk lewat <a href="{{ url_for('auth.login') }}">halaman login nasabah</a>.
+        </p>
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %}

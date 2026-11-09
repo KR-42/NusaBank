@@ -1,0 +1,76 @@
+{% extends "base.html" %}
+{% block title %}Ajukan Klaim{% endblock %}
+
+{% block content %}
+<section class="section-tight">
+  <div class="container">
+    <div class="page-head">
+      <div>
+        <h1>Ajukan klaim asuransi</h1>
+        <p class="muted">Lampirkan dokumen pendukung agar klaim dapat diproses lebih cepat.</p>
+      </div>
+      <a class="btn btn--ghost btn--sm" href="{{ url_for('claims.index') }}">Kembali</a>
+    </div>
+
+    <div class="grid grid--2">
+      <div class="card">
+        <form method="post" enctype="multipart/form-data" novalidate>
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+          <div class="form-group">
+            <label class="form-label" for="policy_id">Polis</label>
+            <select class="form-control" id="policy_id" name="policy_id" required>
+              {% for policy in policies %}
+                <option value="{{ policy.id }}"
+                        data-coverage="{{ policy.coverage }}">
+                  {{ policy.policy_no }} — {{ 'Jiwa' if policy.product == 'jiwa' else 'Kendaraan' }}
+                  ({{ policy.coverage|rupiah }})
+                </option>
+              {% endfor %}
+            </select>
+            {% if not policies %}
+              <p class="form-hint">Anda belum memiliki polis. Hubungi cabang terdekat.</p>
+            {% endif %}
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="amount">Nominal klaim (Rp)</label>
+            {# VULN: claim_amount_bypass — the coverage cap exists only in this
+               client-side `max` attribute; removing it requires no server help. #}
+            <input class="form-control" id="amount" name="amount" inputmode="numeric"
+                   placeholder="5000000"
+                   max="{{ policies[0].coverage if policies else 0 }}">
+            <p class="form-hint">Maksimal sesuai nilai pertanggungan polis.</p>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="description">Kronologi singkat</label>
+            <textarea class="form-control" id="description" name="description" rows="4"
+                      maxlength="1000" placeholder="Jelaskan kejadian dan tanggalnya."></textarea>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="attachment">Lampiran (PDF/JPG/PNG)</label>
+            <input class="form-control" id="attachment" name="attachment" type="file">
+            <p class="form-hint">Opsional. Maksimal 8 MB.</p>
+          </div>
+          <div class="form-actions">
+            <button class="btn btn--primary" type="submit"
+                    {% if not policies %}disabled{% endif %}>Kirim klaim</button>
+          </div>
+        </form>
+      </div>
+
+      <div class="card">
+        <h3>Alur klaim</h3>
+        <ol class="steps">
+          <li><strong>Pengajuan</strong> — isi formulir dan unggah dokumen pendukung.</li>
+          <li><strong>Verifikasi</strong> — tim klaim memeriksa polis dan kronologi (1–3 hari kerja).</li>
+          <li><strong>Keputusan</strong> — status berubah menjadi disetujui atau ditolak.</li>
+          <li><strong>Pencairan</strong> — dana ditransfer ke rekening terdaftar.</li>
+        </ol>
+        <div class="notice mt-2">
+          Klaim palsu dapat dikenakan sanksi sesuai ketentuan polis. Data pada
+          lab ini sepenuhnya fiktif.
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %}

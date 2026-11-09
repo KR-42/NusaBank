@@ -1,0 +1,121 @@
+{% extends "base.html" %}
+{% block title %}Dashboard{% endblock %}
+
+{% block content %}
+<section class="section-tight">
+  <div class="container">
+    <div class="page-head">
+      <div>
+        <h1>Halo, {{ active_user.full_name }}</h1>
+        <p class="muted">Ringkasan rekening Anda per hari ini.</p>
+      </div>
+      <div class="pill-row">
+        <a class="btn btn--ghost btn--sm" href="{{ url_for('transactions.transfer') }}">Transfer</a>
+        <a class="btn btn--ghost btn--sm" href="{{ url_for('tickets.create') }}">Buat tiket</a>
+        <a class="btn btn--ghost btn--sm" href="{{ url_for('dashboard.profile') }}">Profil</a>
+      </div>
+    </div>
+
+    {% if pending_kyc %}
+      <div class="notice notice--warning">
+        Verifikasi KYC Anda belum selesai. Unggah dokumen di
+        <a href="{{ url_for('dashboard.profile') }}">halaman profil</a>.
+      </div>
+    {% endif %}
+
+    <div class="grid grid--2 mt-2">
+      <div class="card">
+        <span class="mini-card__label mini-card__label--dark">Total saldo</span>
+        <div class="balance-xl">{{ total_balance|rupiah }}</div>
+        <table class="data">
+          <thead><tr><th>Rekening</th><th>Tipe</th><th class="text-right">Saldo</th></tr></thead>
+          <tbody>
+            {% for account in accounts %}
+              <tr>
+                <td class="mono">{{ account.account_number }}</td>
+                <td><span class="badge">{{ account.account_type }}</span></td>
+                <td class="text-right amount--in">{{ account.balance|rupiah }}</td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+
+      <div class="card">
+        <h3>10 transaksi terakhir</h3>
+        {# VULN: idor_transactions — account_id comes from the query string and
+           is not checked against active_user.id. #}
+        <form method="get" class="flex gap-1 mt-1">
+          <select class="form-control" name="account_id">
+            {% for account in accounts %}
+              <option value="{{ account.id }}"
+                      {% if account.id|string == account_id|string %}selected{% endif %}>
+                {{ account.account_number }} — {{ account.label }}
+              </option>
+            {% endfor %}
+          </select>
+          <button class="btn btn--ghost btn--sm" type="submit">Tampilkan</button>
+        </form>
+
+        <div class="table-wrap mt-2">
+          <table class="data">
+            <tbody>
+              {% for tx in recent %}
+                <tr>
+                  <td>
+                    <strong>{{ tx.description }}</strong><br>
+                    <span class="small muted">{{ tx.created_at|tanggal }} · {{ tx.category }}</span>
+                  </td>
+                  <td class="text-right {{ 'amount--in' if tx.direction == 'IN' else 'amount--out' }}">
+                    {{ '+' if tx.direction == 'IN' else '−' }}{{ tx.amount|rupiah }}
+                  </td>
+                </tr>
+              {% else %}
+                <tr><td class="muted">Belum ada transaksi.</td></tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <div class="grid grid--3 mt-3">
+      <div class="card">
+        <h3>Kartu</h3>
+        {% for card in cards %}
+          <p class="small muted mb-0">{{ card.brand }} · {{ card.card_type }} · {{ card.expiry }}</p>
+          <p class="mono">{{ card.card_number[:4] }} **** **** {{ card.card_number[-4:] }}</p>
+        {% else %}
+          <p class="muted small">Belum ada kartu.</p>
+        {% endfor %}
+      </div>
+      <div class="card">
+        <h3>Asuransi</h3>
+        {% for policy in policies %}
+          <p class="mb-0"><strong>{{ policy.policy_no }}</strong></p>
+          <p class="small muted">{{ policy.product }} · {{ policy.status }}</p>
+        {% else %}
+          <p class="muted small">Belum ada polis.</p>
+        {% endfor %}
+      </div>
+      <div class="card">
+        <h3>Rekening</h3>
+        <div class="table-wrap">
+          <table class="data">
+            <thead><tr><th>No. Rekening</th><th>Label</th><th class="text-right">Saldo</th></tr></thead>
+            <tbody>
+              {% for account in accounts %}
+                <tr>
+                  <td class="mono">{{ account.account_number }}</td>
+                  <td>{{ account.label }}</td>
+                  <td class="text-right amount--in">{{ account.balance|rupiah }}</td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %}

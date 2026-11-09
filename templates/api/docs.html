@@ -1,0 +1,71 @@
+{% extends "base.html" %}
+{% block title %}API Developer{% endblock %}
+
+{% block content %}
+<section class="section-tight">
+  <div class="container container--narrow">
+    <div class="page-head">
+      <div>
+        <h1>NusaBank API <span class="badge badge--gold">v1</span></h1>
+        <p class="muted">REST API untuk aplikasi mitra: saldo, transaksi, dan profil nasabah.</p>
+      </div>
+      <a class="btn btn--ghost btn--sm" href="{{ url_for('webhook.index') }}">E-Wallet</a>
+    </div>
+
+    <div class="card">
+      <h3>Autentikasi</h3>
+      <p class="small muted">
+        Tukarkan username dan password menjadi JWT di
+        <code class="mono">POST {{ api_prefix }}/auth/token</code>, lalu kirim token pada
+        header <code class="mono">Authorization: Bearer &lt;token&gt;</code>.
+      </p>
+      <pre class="code-block">curl -s -X POST http://127.0.0.1:8080{{ api_prefix }}/auth/token \
+  -H 'Content-Type: application/json' \
+  -d '{"username":"budi01","password":"password"}'</pre>
+      <p class="small muted mb-0">
+        Token berlaku 30 menit pada level <strong>patched</strong>. Level latihan lain
+        memakai secret lemah dan tidak memeriksa kedaluwarsa.
+      </p>
+    </div>
+
+    <div class="card">
+      <h3>Endpoint</h3>
+      <div class="table-wrap mt-1">
+        <table class="data">
+          <thead><tr><th>Method</th><th>Path</th><th>Keterangan</th><th>Auth</th></tr></thead>
+          <tbody>
+            <tr><td><span class="badge">GET</span></td><td class="mono">{{ api_prefix }}/ping</td><td>Status layanan</td><td class="small muted">Publik</td></tr>
+            <tr><td><span class="badge badge--amber">POST</span></td><td class="mono">{{ api_prefix }}/auth/token</td><td>Terbitkan JWT</td><td class="small muted">Publik</td></tr>
+            <tr><td><span class="badge">GET</span></td><td class="mono">{{ api_prefix }}/balance</td><td>Saldo rekening</td><td class="small muted">Bearer</td></tr>
+            <tr><td><span class="badge">GET</span></td><td class="mono">{{ api_prefix }}/transactions</td><td>Mutasi terakhir</td><td class="small muted">Bearer</td></tr>
+            <tr><td><span class="badge">GET</span></td><td class="mono">{{ api_prefix }}/profile</td><td>Data profil nasabah</td><td class="small muted">Bearer</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3>Contoh pemakaian</h3>
+      <pre class="code-block">TOKEN=$(curl -s -X POST http://127.0.0.1:8080{{ api_prefix }}/auth/token \
+  -H 'Content-Type: application/json' \
+  -d '{"username":"budi01","password":"password"}' | python -c 'import sys,json;print(json.load(sys.stdin)["access_token"])')
+
+curl -s http://127.0.0.1:8080{{ api_prefix }}/balance \
+  -H "Authorization: Bearer $TOKEN"
+
+curl -s "http://127.0.0.1:8080{{ api_prefix }}/transactions?limit=5" \
+  -H "Authorization: Bearer $TOKEN"</pre>
+      <p class="small muted mb-0">
+        Parameter opsional: <code class="mono">account_id</code> pada balance/transactions,
+        <code class="mono">limit</code> (1–100) pada transactions, dan
+        <code class="mono">user_id</code> pada profile.
+      </p>
+    </div>
+
+    <div class="notice">
+      Level aktif: <strong>{{ lab_level }}</strong>. Dokumentasi ini disediakan untuk
+      latihan; jangan gunakan token atau data lab di lingkungan produksi.
+    </div>
+  </div>
+</section>
+{% endblock %}

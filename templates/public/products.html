@@ -1,0 +1,79 @@
+{% extends "base.html" %}
+{% block title %}Produk{% endblock %}
+
+{% block content %}
+<section class="page-hero">
+  <div class="container">
+    <span class="kicker">Produk &amp; Layanan</span>
+    <h1>Pilih produk yang tepat untuk tujuan Anda</h1>
+    <p class="page-hero__lead">
+      Simpanan, pembiayaan, dan perlindungan dalam satu ekosistem. Semua produk pada
+      halaman ini merupakan simulasi untuk lingkungan latihan.
+    </p>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    {% for slug, p in products.items() %}
+      {% set detail = details[slug] %}
+      <article class="product-row {% if loop.index is even %}product-row--alt{% endif %}" id="{{ slug }}">
+        <div class="product-row__main">
+          <span class="badge badge--gold">{{ p.rate }}</span>
+          <h2>{{ p.name }}</h2>
+          <p class="muted">{{ detail.tagline }}</p>
+          <ul class="feature-list">
+            {% for item in detail.features %}
+              <li>{{ item }}</li>
+            {% endfor %}
+          </ul>
+          <p class="small muted mt-2">{{ detail.meta }}</p>
+          <div class="form-actions flex gap-1">
+            {% if detail.cta == 'register' %}
+              <a class="btn btn--primary btn--sm" href="{{ url_for('auth.register') }}">Buka rekening</a>
+            {% else %}
+              <a class="btn btn--primary btn--sm" href="{{ url_for('auth.login') }}">Masuk untuk mengajukan</a>
+            {% endif %}
+            <a class="btn btn--ghost btn--sm" href="{{ url_for('public.calculator') }}">Simulasi angsuran</a>
+          </div>
+        </div>
+        <aside class="product-row__aside">
+          <div class="product-figure">
+            <span class="product-figure__mark">{{ p.name[0] }}</span>
+            <span class="product-figure__label">{{ p.name }}</span>
+          </div>
+          <dl class="detail-grid detail-grid--tight">
+            <dt>Bunga acuan</dt>
+            <dd>{{ p.rate }}</dd>
+            <dt>Deposito 12 bulan</dt>
+            <dd>{{ deposit_rate }}% p.a.</dd>
+            <dt>Kredit multiguna</dt>
+            <dd>{{ loan_rate }}% p.a.</dd>
+          </dl>
+        </aside>
+      </article>
+    {% endfor %}
+  </div>
+</section>
+
+<section class="section section--tint">
+  <div class="container">
+    <div class="section__head">
+      <span class="kicker">Simulasi</span>
+      <h2>Hitung angsuran sebelum mengajukan</h2>
+      <p>Gunakan kalkulator angsuran untuk memperkirakan cicilan bulanan.</p>
+    </div>
+    <div class="grid grid--3">
+      {% for slug, product in financing.items() %}
+        <div class="card">
+          <h3>{{ product.label }}</h3>
+          <p class="card__rate">{{ product.rate }}% p.a.</p>
+          <p class="small muted mb-0">Tenor maksimum {{ product.max_tenor }} bulan.</p>
+          <a class="btn btn--ghost btn--sm mt-2"
+             href="{{ url_for('public.calculator', produk=slug) }}">Hitung</a>
+        </div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+{% endblock %}

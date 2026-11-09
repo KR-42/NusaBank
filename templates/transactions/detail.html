@@ -1,0 +1,65 @@
+{% extends "base.html" %}
+{% block title %}Detail Transaksi{% endblock %}
+
+{% block content %}
+<section class="section-tight">
+  <div class="container container--narrow">
+    <div class="page-head">
+      <div>
+        <h1>Detail transaksi</h1>
+        <p class="muted mono">{{ tx.ref_no }}</p>
+      </div>
+      <div class="flex gap-1">
+        <a class="btn btn--ghost btn--sm"
+           href="{{ url_for('transactions.receipt', tx_id=tx.id) }}">Struk</a>
+        <a class="btn btn--ghost btn--sm"
+           href="{{ url_for('transactions.history', account_id=tx.account_id) }}">Kembali</a>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="detail-grid">
+        <div><span class="muted small">Status</span><strong>{{ tx.status|upper }}</strong></div>
+        <div>
+          <span class="muted small">Arah</span>
+          <strong class="{{ 'amount--in' if tx.direction == 'IN' else 'amount--out' }}">
+            {{ 'Dana masuk' if tx.direction == 'IN' else 'Dana keluar' }}
+          </strong>
+        </div>
+        <div><span class="muted small">Nominal</span>
+          <strong class="balance-xl">{{ tx.amount|rupiah }}</strong></div>
+        <div><span class="muted small">Saldo setelah transaksi</span>
+          <strong>{{ tx.balance_after|rupiah }}</strong></div>
+        <div><span class="muted small">Waktu</span>
+          <strong>{{ tx.created_at }}</strong></div>
+        <div><span class="muted small">Jenis</span>
+          <strong>{{ tx.kind or tx.type or 'TRANSFER' }}</strong></div>
+        <div><span class="muted small">Rekening</span>
+          <strong class="mono">{{ account.account_number }}</strong></div>
+        <div><span class="muted small">Pemilik rekening</span>
+          <strong>{{ owner.full_name }}</strong></div>
+        <div><span class="muted small">Lawan transaksi</span>
+          <strong>{{ tx.counterparty_name or '-' }}</strong></div>
+        <div><span class="muted small">Rekening lawan</span>
+          <strong class="mono">{{ tx.counterparty_account or '-' }}</strong></div>
+        <div class="detail-grid__full">
+          <span class="muted small">Berita</span>
+          <strong>
+            {% if xss_stored %}
+              {# VULN: xss_stored — stored description rendered unescaped. #}
+              {{ tx.description|safe }}
+            {% else %}
+              {{ tx.description }}
+            {% endif %}
+          </strong>
+        </div>
+      </div>
+
+      <div class="notice mt-2">
+        Simpan referensi <span class="mono">{{ tx.ref_no }}</span> bila Anda perlu
+        menghubungi NusaBank Call Center terkait transaksi ini.
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %}

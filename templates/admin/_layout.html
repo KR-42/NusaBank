@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+{% block content %}
+<section class="section-tight">
+  <div class="container">
+    <div class="page-head">
+      <div>
+        <h1>{% block admin_title %}Panel Administrator{% endblock %}</h1>
+        <p class="muted">{% block admin_subtitle %}Back-office NusaBank — data fiktif untuk latihan.{% endblock %}</p>
+      </div>
+      <div class="pill-row">
+        {% if admin_user %}
+          <span class="badge badge--gold">{{ admin_user.role }}</span>
+          <span class="small muted">{{ admin_user.full_name }}</span>
+          <a class="btn btn--ghost btn--sm" href="{{ url_for('admin.logout') }}">Keluar admin</a>
+        {% endif %}
+      </div>
+    </div>
+
+    {% include "admin/_nav.html" %}
+
+    {% block admin_content %}{% endblock %}
+  </div>
+</section>
+{% endblock %}

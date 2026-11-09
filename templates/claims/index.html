@@ -1,0 +1,79 @@
+{% extends "base.html" %}
+{% block title %}Asuransi{% endblock %}
+
+{% block content %}
+<section class="section-tight">
+  <div class="container">
+    <div class="page-head">
+      <div>
+        <h1>Asuransi &amp; klaim</h1>
+        <p class="muted">Polis aktif Anda dan status pengajuan klaim.</p>
+      </div>
+      <a class="btn btn--primary btn--sm" href="{{ url_for('claims.claim_new') }}">Ajukan klaim</a>
+    </div>
+
+    <div class="card">
+      <h3>Polis saya</h3>
+      <div class="table-wrap mt-1">
+        <table class="data">
+          <thead>
+            <tr>
+              <th>No. Polis</th><th>Produk</th><th class="text-right">Pertanggungan</th>
+              <th class="text-right">Premi</th><th>Periode</th><th>Status</th><th></th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for policy in policies %}
+              <tr>
+                <td class="mono">{{ policy.policy_no }}</td>
+                <td>{{ 'Jiwa' if policy.product == 'jiwa' else 'Kendaraan' }}</td>
+                <td class="text-right">{{ policy.coverage|rupiah }}</td>
+                <td class="text-right">{{ policy.premium|rupiah }}</td>
+                <td class="small muted">{{ policy.start_date }} — {{ policy.end_date }}</td>
+                <td><span class="badge {{ 'badge--green' if policy.status == 'active' else 'badge--amber' }}">{{ policy.status }}</span></td>
+                <td class="text-right small muted">{{ policy.claim_count }} klaim</td>
+              </tr>
+            {% else %}
+              <tr><td colspan="7" class="muted">Belum ada polis asuransi.</td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3>Riwayat klaim</h3>
+      <div class="table-wrap mt-1">
+        <table class="data">
+          <thead>
+            <tr>
+              <th>No. Klaim</th><th>Polis</th><th class="text-right">Nominal</th>
+              <th>Diajukan</th><th>Status</th><th></th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for claim in claims %}
+              <tr>
+                <td class="mono">{{ claim.claim_no }}</td>
+                <td class="small">{{ claim.policy_no }} · {{ claim.product }}</td>
+                <td class="text-right">{{ claim.amount|rupiah }}</td>
+                <td class="small muted">{{ claim.created_at|tanggal }}</td>
+                <td>
+                  <span class="badge {{ 'badge--green' if claim.status == 'approved' else ('badge--red' if claim.status == 'rejected' else 'badge--amber') }}">
+                    {{ claim.status }}
+                  </span>
+                </td>
+                <td class="text-right">
+                  <a class="small" href="{{ url_for('claims.claim_detail', claim_id=claim.id) }}">Detail</a>
+                </td>
+              </tr>
+            {% else %}
+              <tr><td colspan="6" class="muted">Belum ada klaim.</td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %}

@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+{% block title %}Unggah Dokumen KYC{% endblock %}
+
+{% block content %}
+<section class="section-tight">
+  <div class="container">
+    <div class="page-head">
+      <h1>Unggah dokumen KYC</h1>
+      <p class="muted">Format yang diterima: PDF, JPG, atau PNG.</p>
+    </div>
+
+    <div class="auth-card auth-card--wide">
+      <form method="post" enctype="multipart/form-data" novalidate>
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <div class="form-group">
+          <label class="form-label" for="doc_type">Jenis dokumen</label>
+          <select class="form-control" id="doc_type" name="doc_type">
+            {% for type in doc_types %}
+              <option value="{{ type }}">{{ type|upper }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="document">Berkas</label>
+          <input class="form-control" id="document" name="document" type="file" required>
+          <p class="form-hint">Maksimal 8 MB.</p>
+        </div>
+        <div class="form-actions">
+          <button class="btn btn--primary" type="submit">Unggah</button>
+          <a class="btn btn--ghost" href="{{ url_for('dashboard.profile') }}">Batal</a>
+        </div>
+      </form>
+    </div>
+  </div>
+</section>
+{% endblock %}

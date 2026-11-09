@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% block title %}Lupa Password{% endblock %}
+
+{% block content %}
+<section class="auth-shell">
+  <div class="auth-card">
+    <h1>Lupa password</h1>
+    <p class="sub">Masukkan email atau username untuk menerima tautan reset.</p>
+
+    <form method="post" novalidate>
+      <div class="form-group">
+        <label class="form-label" for="identifier">Email atau username</label>
+        <input class="form-control" id="identifier" name="identifier" required autofocus>
+      </div>
+      <button class="btn btn--primary btn--block" type="submit">Kirim tautan reset</button>
+    </form>
+
+    <p class="small text-center mt-2 mb-0">
+      <a href="{{ url_for('auth.login') }}">Kembali ke halaman masuk</a>
+    </p>
+  </div>
+</section>
+{% endblock %}

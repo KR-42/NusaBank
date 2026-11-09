@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+{% block title %}Status Sistem{% endblock %}
+
+{% block content %}
+<section class="section">
+  <div class="container">
+    <div class="page-head">
+      <span class="eyebrow">Internal</span>
+      <h1>Status Sistem</h1>
+      <p class="muted">Halaman diagnostik internal platform NusaBank.</p>
+    </div>
+
+    {# VULN: info_disclosure — environment, paths, and config are dumped to
+       anyone who can reach /debug (no authentication). #}
+    <div class="card">
+      <h2>Environment</h2>
+      <table class="data-table">
+        <thead><tr><th>Key</th><th>Value</th></tr></thead>
+        <tbody>
+          {% for key, value in env.items() %}
+            <tr><td><code>{{ key }}</code></td><td><code>{{ value }}</code></td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+
+    <div class="card">
+      <h2>Runtime</h2>
+      <table class="data-table">
+        <thead><tr><th>Key</th><th>Value</th></tr></thead>
+        <tbody>
+          <tr><td>Python</td><td>{{ python_version }}</td></tr>
+          <tr><td>Platform</td><td>{{ platform }}</td></tr>
+          <tr><td>Working directory</td><td><code>{{ cwd }}</code></td></tr>
+          <tr><td>Database</td><td><code>{{ db_path }}</code></td></tr>
+          <tr><td>Upload directory</td><td><code>{{ upload_dir }}</code></td></tr>
+          <tr><td>Laboratory level</td><td>{{ lab_level }}</td></tr>
+        </tbody>
+      </table>
+      <p class="muted small">Sistem operasi inti: {{ debug }}</p>
+    </div>
+
+    <div class="card">
+      <h2>Konfigurasi aplikasi</h2>
+      <table class="data-table">
+        <thead><tr><th>Setting</th><th>Value</th></tr></thead>
+        <tbody>
+          {% for key, value in config.items() %}
+            <tr><td><code>{{ key }}</code></td><td><code>{{ value }}</code></td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+{% endblock %}

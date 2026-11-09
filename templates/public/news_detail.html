@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+{% block title %}{{ article.title }}{% endblock %}
+
+{% block content %}
+<section class="section-tight">
+  <div class="container container--narrow">
+    <p class="small"><a href="{{ url_for('public.news') }}">← Kembali ke berita</a></p>
+
+    <article class="article">
+      <div class="article__head">
+        <span class="badge badge--gold">{{ article.category }}</span>
+        <h1>{{ article.title }}</h1>
+        <p class="small muted">
+          {{ article.author }} · {{ article.published_at|tanggal }} ·
+          {{ article.views }} kali dibaca
+        </p>
+      </div>
+
+      <div class="article__body">
+        {% for paragraph in paragraphs %}
+          {# Article bodies are CMS content and are rendered as plain text. #}
+          <p>{{ paragraph }}</p>
+        {% endfor %}
+      </div>
+    </article>
+
+    {% if others %}
+      <div class="card mt-3">
+        <h3>Artikel lainnya</h3>
+        <div class="article-list mt-2">
+          {% for other in others %}
+            <a class="article-card article-card--compact"
+               href="{{ url_for('public.news_detail', slug=other.slug) }}">
+              <span class="small muted">{{ other.category }} · {{ other.published_at|tanggal }}</span>
+              <h3>{{ other.title }}</h3>
+            </a>
+          {% endfor %}
+        </div>
+      </div>
+    {% endif %}
+  </div>
+</section>
+{% endblock %}

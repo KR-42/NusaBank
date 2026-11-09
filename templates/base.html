@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}{{ site_name }}{% endblock %} — {{ site_name }}</title>
+  <meta name="description" content="NusaBank — bank digital untuk Indonesia. Aplikasi lab pentest.">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+  {% block head %}{% endblock %}
+</head>
+<body data-lab-level="{{ lab_level }}">
+  <a class="skip-link" href="#main">Lewati ke konten</a>
+
+  <div class="lab-banner" role="alert">
+    <div class="container lab-banner__inner">
+      <span class="lab-banner__tag">LAB PENTEST</span>
+      <span class="lab-banner__text">
+        Aplikasi ini <strong>sengaja dibuat rentan</strong> dan hanya untuk latihan lokal.
+        Jangan pernah di-expose ke internet.
+      </span>
+      <span class="level-pill level-pill--{{ lab_level }}">LEVEL {{ lab_level|upper }}</span>
+    </div>
+  </div>
+
+  <header class="site-header">
+    <div class="container header__inner">
+      <a class="brand" href="{{ url_for('public.index') }}">
+        <span class="brand__mark">N</span>
+        <span class="brand__name">Nusa<span>Bank</span></span>
+      </a>
+
+      <button class="nav-toggle" type="button" aria-label="Buka menu" aria-expanded="false"
+              data-nav-toggle>
+        <span></span><span></span><span></span>
+      </button>
+
+      <nav class="main-nav" id="main-nav" aria-label="Navigasi utama">
+        {% if active_user %}
+          <a href="{{ url_for('dashboard.index') }}">Dashboard</a>
+          <a href="{{ url_for('transactions.history') }}">Transaksi</a>
+          <a href="{{ url_for('webhook.index') }}">E-Wallet</a>
+          <a href="{{ url_for('claims.index') }}">Asuransi</a>
+          <a href="{{ url_for('tickets.index') }}">Bantuan</a>
+          <a href="{{ url_for('dashboard.profile') }}">Profil</a>
+          {# Back-office entry is visible to admins only (the server still guards
+             /admin itself — see app/routes_admin.py). On easy/medium the panel
+             is open to every customer, so the link is shown to all. #}
+          {% if active_user.role.startswith('admin') or lab_policy.is_vulnerable('admin_no_role_check') %}
+            <a href="{{ url_for('admin.dashboard') }}">Admin</a>
+          {% endif %}
+        {% else %}
+          <a href="{{ url_for('public.products') }}">Produk</a>
+          <a href="{{ url_for('public.calculator') }}">Kalkulator</a>
+          <a href="{{ url_for('public.news') }}">Berita</a>
+          <a href="{{ url_for('public.faq') }}">FAQ</a>
+          <a href="{{ url_for('public.contact') }}">Kontak</a>
+        {% endif %}
+      </nav>
+
+      <div class="header__actions">
+        {% if active_user %}
+          <span class="header__user">{{ active_user.full_name }}</span>
+          <a class="btn btn--ghost btn--sm" href="{{ url_for('auth.logout') }}">Keluar</a>
+        {% else %}
+          <a class="btn btn--ghost btn--sm" href="{{ url_for('auth.login') }}">Masuk</a>
+          <a class="btn btn--primary btn--sm" href="{{ url_for('auth.register') }}">Buka Rekening</a>
+          {# Hidden back-office entrance used in the walkthrough. #}
+          <a class="header__admin-link" href="{{ url_for('admin.login') }}"
+             title="Panel administrator" aria-label="Panel administrator">Admin</a>
+        {% endif %}
+      </div>
+    </div>
+  </header>
+
+  <main id="main">
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        <div class="container flash-stack">
+          {% for category, message in messages %}
+            <div class="flash flash--{{ category }}">{{ message }}</div>
+          {% endfor %}
+        </div>
+      {% endif %}
+    {% endwith %}
+    {% block content %}{% endblock %}
+  </main>
+
+  <footer class="site-footer">
+    <div class="container footer__grid">
+      <div class="footer__brand">
+        <a class="brand brand--footer" href="{{ url_for('public.index') }}">
+          <span class="brand__mark">N</span>
+          <span class="brand__name">Nusa<span>Bank</span></span>
+        </a>
+        <p>{{ site_tagline }}. Seluruh produk, data, dan entitas pada situs ini adalah fiktif
+           dan dibuat khusus untuk latihan keamanan.</p>
+      </div>
+      <div class="footer__col">
+        <h4>Produk</h4>
+        <a href="{{ url_for('public.products') }}#tabungan">Tabungan</a>
+        <a href="{{ url_for('public.products') }}#deposito">Deposito</a>
+        <a href="{{ url_for('public.products') }}#kartu-kredit">Kartu Kredit</a>
+        <a href="{{ url_for('public.products') }}#asuransi-jiwa">Asuransi</a>
+      </div>
+      <div class="footer__col">
+        <h4>Bantuan</h4>
+        <a href="{{ url_for('public.faq') }}">FAQ</a>
+        <a href="{{ url_for('public.contact') }}">Hubungi Kami</a>
+        <a href="{{ url_for('public.calculator') }}">Kalkulator Angsuran</a>
+        <a href="{{ url_for('public.news') }}">Berita</a>
+        <a href="{{ url_for('api.docs') }}">API Developer</a>
+        {% if lab_policy.is_vulnerable('debug_endpoint') %}
+          <a href="{{ url_for('public.debug') }}">Status Sistem</a>
+        {% endif %}
+      </div>
+      <div class="footer__col footer__col--lab">
+        <h4>Status Lab</h4>
+        <p class="footer__level">
+          <span class="level-pill level-pill--{{ lab_level }}">{{ lab_level|upper }}</span>
+        </p>
+        <p class="footer__muted">{{ lab_level_text }}</p>
+      </div>
+    </div>
+    <div class="container footer__bottom">
+      <span>© {{ now_year }} {{ site_name }} (fiktif). Dibuat untuk pelatihan pentest.</span>
+      <span class="footer__warning">⚠ Jangan expose ke internet</span>
+    </div>
+  </footer>
+
+  <script src="{{ url_for('static', filename='js/app.js') }}" defer></script>
+  {% block scripts %}{% endblock %}
+</body>
+</html>

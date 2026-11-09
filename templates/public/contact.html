@@ -1,0 +1,90 @@
+{% extends "base.html" %}
+{% block title %}Hubungi Kami{% endblock %}
+
+{% block content %}
+<section class="section-tight">
+  <div class="container">
+    <div class="page-head">
+      <div>
+        <span class="kicker">Hubungi Kami</span>
+        <h1>Kirim pesan ke tim NusaBank</h1>
+        <p class="muted">Kami membalas dalam 1–2 hari kerja melalui email.</p>
+      </div>
+    </div>
+
+    {% if thanks %}
+      {# VULN: xss_reflected — the visitor-supplied name is echoed unescaped. #}
+      <div class="notice notice--success">
+        {% if xss_reflected %}{{ thanks|safe }}{% else %}{{ thanks }}{% endif %}
+      </div>
+    {% endif %}
+
+    {% if errors %}
+      <div class="notice notice--danger">
+        <ul class="list-tight mb-0">
+          {% for message in errors %}<li>{{ message }}</li>{% endfor %}
+        </ul>
+      </div>
+    {% endif %}
+
+    <div class="grid grid--2">
+      <div class="card">
+        <form method="post" novalidate>
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label" for="name">Nama lengkap</label>
+              <input class="form-control" id="name" name="name" value="{{ form.name }}" required>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="email">Email</label>
+              <input class="form-control" id="email" name="email" type="email"
+                     value="{{ form.email }}" required>
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label" for="phone">Telepon (opsional)</label>
+              <input class="form-control" id="phone" name="phone" value="{{ form.phone }}">
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="subject">Subjek</label>
+              <input class="form-control" id="subject" name="subject" value="{{ form.subject }}">
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="message">Pesan</label>
+            <textarea class="form-control" id="message" name="message" rows="6"
+                      required>{{ form.message }}</textarea>
+          </div>
+          <button class="btn btn--primary" type="submit">Kirim pesan</button>
+        </form>
+      </div>
+
+      <div>
+        <div class="card">
+          <h3>Kontak resmi</h3>
+          <dl class="detail-grid">
+            <dt>Telepon</dt>
+            <dd>1500-800 (bebas pulsa)</dd>
+            <dt>Email</dt>
+            <dd>{{ support_email }}</dd>
+            <dt>Kantor pusat</dt>
+            <dd>Jl. Contoh Raya No. 1, Jakarta Selatan</dd>
+            <dt>Jam layanan</dt>
+            <dd>Senin–Jumat 08.00–20.00 WIB</dd>
+          </dl>
+        </div>
+        <div class="card">
+          <h3>Butuh bantuan transaksi?</h3>
+          <p class="small muted">
+            Untuk kendala rekening, PIN, atau transaksi, buka tiket bantuan dari
+            dashboard agar tim operasional dapat menindaklanjuti lebih cepat.
+          </p>
+          <a class="btn btn--ghost btn--sm" href="{{ url_for('tickets.index') }}">Buka tiket</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %}

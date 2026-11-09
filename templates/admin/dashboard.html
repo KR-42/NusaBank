@@ -1,0 +1,128 @@
+{% extends "admin/_layout.html" %}
+{% block title %}Ringkasan Admin{% endblock %}
+{% block admin_subtitle %}Kondisi operasional NusaBank hari ini.{% endblock %}
+
+{% block admin_content %}
+<div class="stat-strip">
+  <div class="stat">
+    <strong>{{ stats.users }}</strong>
+    <span>Total akun ({{ stats.customers }} nasabah)</span>
+  </div>
+  <div class="stat">
+    <strong>{{ stats.balance|rupiah }}</strong>
+    <span>Dana kelolaan</span>
+  </div>
+  <div class="stat">
+    <strong>{{ stats.tx_today }}</strong>
+    <span>Transaksi hari ini</span>
+  </div>
+  <div class="stat">
+    <strong>{{ stats.kyc_pending }}</strong>
+    <span>KYC menunggu verifikasi</span>
+  </div>
+</div>
+
+<div class="stat-strip mt-2">
+  <div class="stat">
+    <strong>{{ stats.claims_pending }}</strong>
+    <span>Klaim menunggu review</span>
+  </div>
+  <div class="stat">
+    <strong>{{ stats.claims_amount|rupiah }}</strong>
+    <span>Nilai klaim tertunda</span>
+  </div>
+  <div class="stat">
+    <strong>{{ stats.tickets_open }}</strong>
+    <span>Tiket belum selesai</span>
+  </div>
+  <div class="stat">
+    <strong>{{ lab_level|upper }}</strong>
+    <span>Level lab aktif</span>
+  </div>
+</div>
+
+{% if weak_sessions %}
+  <div class="notice notice--danger mt-3">
+    <strong>Peringatan konfigurasi lab:</strong> pada level ini panel administrator
+    menerima sesi nasabah biasa tanpa memeriksa role. Ini disengaja untuk latihan
+    <em>broken access control</em>.
+  </div>
+{% endif %}
+
+<div class="grid grid--2 mt-3">
+  <div class="card">
+    <h3>Transaksi terbaru</h3>
+    <div class="table-wrap mt-1">
+      <table class="data">
+        <thead><tr><th>Waktu</th><th>Nasabah</th><th class="text-right">Nominal</th></tr></thead>
+        <tbody>
+          {% for tx in recent %}
+            <tr>
+              <td class="small muted">{{ tx.created_at|tanggal }}</td>
+              <td>
+                <strong>{{ tx.full_name }}</strong><br>
+                <span class="small muted mono">{{ tx.ref_no }}</span>
+              </td>
+              <td class="text-right {{ 'amount--in' if tx.direction == 'IN' else 'amount--out' }}">
+                {{ '+' if tx.direction == 'IN' else '−' }}{{ tx.amount|rupiah }}
+              </td>
+            </tr>
+          {% else %}
+            <tr><td colspan="3" class="muted">Belum ada transaksi.</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>Antrean verifikasi</h3>
+    <p class="small muted">Dokumen KYC yang menunggu keputusan.</p>
+    {% for doc in pending_kyc %}
+      <div class="hook">
+        <div class="hook__head">
+          <strong>{{ doc.full_name }}</strong>
+          <span class="badge badge--amber">{{ doc.doc_type }}</span>
+        </div>
+        <p class="small muted mb-0">{{ doc.original_name }} · {{ doc.uploaded_at|tanggal }}</p>
+        <div class="pill-row mt-1">
+          <a class="btn btn--ghost btn--sm" href="{{ url_for('admin.kyc', status='pending') }}">Tinjau</a>
+        </div>
+      </div>
+    {% else %}
+      <p class="small muted">Tidak ada dokumen KYC tertunda.</p>
+    {% endfor %}
+
+    <h3 class="mt-3">Klaim tertunda</h3>
+    {% for claim in pending_claims %}
+      <div class="hook">
+        <div class="hook__head">
+          <strong>{{ claim.claim_no }}</strong>
+          <span class="badge badge--amber">{{ claim.amount|rupiah }}</span>
+        </div>
+        <p class="small muted mb-0">{{ claim.full_name }} · {{ claim.created_at|tanggal }}</p>
+      </div>
+    {% else %}
+      <p class="small muted">Tidak ada klaim tertunda.</p>
+    {% endfor %}
+  </div>
+</div>
+
+<div class="card mt-3">
+  <h3>Konfigurasi lab</h3>
+  <p class="small muted">
+    Nilai berikut hanya tersedia di panel administrator. Jika Anda bisa membacanya
+    tanpa kredensial admin yang sah, berarti kontrol akses panel ini jebol.
+  </p>
+  <dl class="detail-grid mt-2">
+    <div>
+      <dt>Flag panel admin</dt>
+      <dd class="mono">{{ panel_flag or 'tidak diset' }}</dd>
+    </div>
+    <div>
+      <dt>Level aktif</dt>
+      <dd>{{ lab_level }} — {{ lab_level_text }}</dd>
+    </div>
+  </dl>
+</div>
+{% endblock %}

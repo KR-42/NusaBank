@@ -1,0 +1,26 @@
+{# Navigasi back-office. Semua tautan tetap ditampilkan; otorisasi diputuskan
+   di server oleh decorator admin_access(). #}
+<nav class="admin-nav" aria-label="Navigasi administrator">
+  <a href="{{ url_for('admin.dashboard') }}"
+     class="{{ 'is-active' if request.endpoint == 'admin.dashboard' }}">Ringkasan</a>
+  <a href="{{ url_for('admin.users') }}"
+     class="{{ 'is-active' if request.endpoint in ('admin.users', 'admin.user_detail') }}">Nasabah</a>
+  <a href="{{ url_for('admin.kyc') }}"
+     class="{{ 'is-active' if request.endpoint == 'admin.kyc' }}">KYC</a>
+  <a href="{{ url_for('admin.claims') }}"
+     class="{{ 'is-active' if request.endpoint == 'admin.claims' }}">Klaim</a>
+  <a href="{{ url_for('admin.transactions') }}"
+     class="{{ 'is-active' if request.endpoint == 'admin.transactions' }}">Transaksi</a>
+  <a href="{{ url_for('admin.tickets') }}"
+     class="{{ 'is-active' if request.endpoint in ('admin.tickets', 'admin.ticket_detail') }}">Tiket</a>
+  <a href="{{ url_for('admin.audit_log') }}"
+     class="{{ 'is-active' if request.endpoint == 'admin.audit_log' }}">Audit</a>
+  <a href="{{ url_for('admin.reports') }}"
+     class="{{ 'is-active' if request.endpoint == 'admin.reports' }}">Laporan</a>
+  <a href="{{ url_for('admin.files') }}"
+     class="{{ 'is-active' if request.endpoint == 'admin.files' }}">Berkas</a>
+  <a href="{{ url_for('admin.settings') }}"
+     class="{{ 'is-active' if request.endpoint == 'admin.settings' }}">Pengaturan</a>
+  <a href="{{ url_for('admin.diagnostics') }}"
+     class="{{ 'is-active' if request.endpoint == 'admin.diagnostics' }}">Diagnostik</a>
+</nav>

@@ -1,0 +1,45 @@
+{% extends "admin/_layout.html" %}
+{% block title %}Tiket Dukungan{% endblock %}
+{% block admin_subtitle %}Pengaduan nasabah yang masuk ke layanan pelanggan.{% endblock %}
+
+{% block admin_content %}
+<div class="card">
+  <div class="pill-row">
+    <a class="btn btn--sm {{ 'btn--primary' if not status else 'btn--ghost' }}"
+       href="{{ url_for('admin.tickets') }}">Semua</a>
+    {% for item in statuses %}
+      <a class="btn btn--sm {{ 'btn--primary' if item == status else 'btn--ghost' }}"
+         href="{{ url_for('admin.tickets', status=item) }}">{{ item }}</a>
+    {% endfor %}
+  </div>
+
+  <div class="table-wrap mt-2">
+    <table class="data">
+      <thead><tr><th>No. Tiket</th><th>Subjek</th><th>Nasabah</th><th>Prioritas</th>
+                 <th>Status</th><th>Komentar</th><th>Diperbarui</th></tr></thead>
+      <tbody>
+        {% for ticket in rows %}
+          <tr>
+            <td class="mono small">{{ ticket.ticket_no }}</td>
+            <td>
+              <a href="{{ url_for('admin.ticket_detail', ticket_id=ticket.id) }}">{{ ticket.subject }}</a><br>
+              <span class="small muted">{{ ticket.category }}</span>
+            </td>
+            <td class="small">{{ ticket.full_name }}</td>
+            <td><span class="badge">{{ ticket.priority }}</span></td>
+            <td>
+              <span class="badge {{ 'badge--green' if ticket.status == 'closed' else ('badge--amber' if ticket.status == 'in_progress' else '') }}">
+                {{ ticket.status }}
+              </span>
+            </td>
+            <td class="text-right">{{ ticket.comment_count }}</td>
+            <td class="small muted">{{ ticket.updated_at|tanggal }}</td>
+          </tr>
+        {% else %}
+          <tr><td colspan="7" class="muted">Tidak ada tiket.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

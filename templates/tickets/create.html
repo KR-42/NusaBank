@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+{% block title %}Tiket Baru{% endblock %}
+
+{% block content %}
+<section class="section-tight">
+  <div class="container">
+    <div class="page-head">
+      <div>
+        <h1>Buat tiket dukungan</h1>
+        <p class="muted">Ceritakan kendala Anda sedetail mungkin agar cepat ditangani.</p>
+      </div>
+      <a class="btn btn--ghost btn--sm" href="{{ url_for('tickets.index') }}">Kembali</a>
+    </div>
+
+    <div class="auth-card auth-card--wide">
+      <form method="post" novalidate>
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <div class="form-group">
+          <label class="form-label" for="subject">Subjek</label>
+          <input class="form-control" id="subject" name="subject" maxlength="140" required
+                 placeholder="Contoh: Transfer tidak masuk ke rekening tujuan">
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label" for="category">Kategori</label>
+            <select class="form-control" id="category" name="category">
+              {% for category in categories %}
+                <option value="{{ category }}">{{ category|capitalize }}</option>
+              {% endfor %}
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="priority">Prioritas</label>
+            <select class="form-control" id="priority" name="priority">
+              {% for priority in priorities %}
+                <option value="{{ priority }}" {% if priority == 'normal' %}selected{% endif %}>
+                  {{ priority }}
+                </option>
+              {% endfor %}
+            </select>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="body">Isi pengaduan</label>
+          <textarea class="form-control" id="body" name="body" rows="6" required
+                    placeholder="Sertakan tanggal, nominal, dan nomor referensi transaksi."></textarea>
+        </div>
+        <div class="form-actions">
+          <button class="btn btn--primary" type="submit">Kirim tiket</button>
+          <a class="btn btn--ghost" href="{{ url_for('tickets.index') }}">Batal</a>
+        </div>
+      </form>
+    </div>
+  </div>
+</section>
+{% endblock %}

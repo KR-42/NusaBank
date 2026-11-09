@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+{% block title %}Pusat Bantuan{% endblock %}
+
+{% block content %}
+<section class="section-tight">
+  <div class="container">
+    <div class="page-head">
+      <div>
+        <h1>Pusat bantuan</h1>
+        <p class="muted">Ajukan pengaduan dan pantau tanggapan tim layanan pelanggan.</p>
+      </div>
+      <a class="btn btn--primary btn--sm" href="{{ url_for('tickets.create') }}">Tiket baru</a>
+    </div>
+
+    {% if xss_stored %}
+      {# VULN: ticket_xss — subjects are rendered unescaped on easy/medium. #}
+    {% endif %}
+
+    <div class="card">
+      <div class="table-wrap">
+        <table class="data">
+          <thead>
+            <tr>
+              <th>No. Tiket</th><th>Subjek</th><th>Kategori</th>
+              <th>Prioritas</th><th>Status</th><th>Diperbarui</th><th></th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for ticket in tickets %}
+              <tr>
+                <td class="mono small">{{ ticket.ticket_no }}</td>
+                <td>
+                  {% if xss_stored %}
+                    <strong>{{ ticket.subject|safe }}</strong>
+                  {% else %}
+                    <strong>{{ ticket.subject }}</strong>
+                  {% endif %}
+                  <br><span class="small muted">{{ ticket.comment_count }} pesan</span>
+                </td>
+                <td><span class="badge">{{ ticket.category }}</span></td>
+                <td class="small">{{ ticket.priority }}</td>
+                <td>
+                  <span class="badge {{ 'badge--green' if ticket.status == 'closed' else ('badge--amber' if ticket.status == 'in_progress' else '') }}">
+                    {{ status_labels.get(ticket.status, ticket.status) }}
+                  </span>
+                </td>
+                <td class="small muted">{{ ticket.updated_at|tanggal }}</td>
+                <td class="text-right">
+                  <a class="small" href="{{ url_for('tickets.detail', ticket_id=ticket.id) }}">Buka</a>
+                </td>
+              </tr>
+            {% else %}
+              <tr><td colspan="7" class="muted">Belum ada tiket.</td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %}

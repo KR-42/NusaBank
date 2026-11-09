@@ -1,0 +1,71 @@
+{% extends "admin/_layout.html" %}
+{% block title %}Diagnostik Jaringan{% endblock %}
+{% block admin_subtitle %}Uji konektivitas ke host mitra dari server NusaBank.{% endblock %}
+
+{% block admin_content %}
+<div class="grid grid--2">
+  <div class="card">
+    <h3>Ping host</h3>
+    <p class="small muted">
+      Utilitas ini menjalankan <span class="mono">ping</span> dari server. Masukkan
+      nama host atau alamat IP tujuan.
+    </p>
+    <form method="post">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      <div class="form-group">
+        <label class="form-label" for="host">Host tujuan</label>
+        <input class="form-control mono" id="host" name="host" value="{{ host }}"
+               placeholder="partner.nusabank.example.com" required>
+      </div>
+      <div class="form-actions">
+        <button class="btn btn--primary btn--sm" type="submit">Jalankan ping</button>
+      </div>
+    </form>
+
+    {% if vulnerable %}
+      <div class="notice notice--warning mt-2">
+        <strong>Catatan lab:</strong> nilai host diteruskan ke perintah sistem.
+        Perhatikan bagaimana input ini digabungkan ke shell.
+      </div>
+    {% endif %}
+
+    {% if error %}
+      <div class="notice notice--danger mt-2">{{ error }}</div>
+    {% endif %}
+  </div>
+
+  <div class="card">
+    <h3>Hasil</h3>
+    {% if command %}
+      <p class="small muted mb-0">Perintah:</p>
+      <pre class="code-block">{{ command }}</pre>
+    {% endif %}
+    {% if output is not none %}
+      <p class="small muted mb-0">Keluaran:</p>
+      <pre class="code-block">{{ output }}</pre>
+    {% elif not error %}
+      <p class="small muted">Belum ada perintah yang dijalankan.</p>
+    {% endif %}
+  </div>
+</div>
+
+<div class="card mt-3">
+  <h3>Riwayat diagnostik</h3>
+  <div class="table-wrap">
+    <table class="data">
+      <thead><tr><th>Waktu</th><th>Aktor</th><th>Detail</th></tr></thead>
+      <tbody>
+        {% for log in history %}
+          <tr>
+            <td class="small muted">{{ log.created_at|tanggal }}</td>
+            <td class="small">{{ log.actor or '-' }}</td>
+            <td class="mono small">{{ log.detail }}</td>
+          </tr>
+        {% else %}
+          <tr><td colspan="3" class="muted">Belum ada riwayat.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

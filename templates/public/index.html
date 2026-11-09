@@ -1,0 +1,177 @@
+{% extends "base.html" %}
+{% block title %}Bank Digital untuk Indonesia{% endblock %}
+
+{% block content %}
+<section class="hero">
+  <div class="container hero__grid">
+    <div>
+      <span class="hero__eyebrow">Berizin &amp; diawasi OJK (fiktif)</span>
+      <h1>Bank digital yang tumbuh <em>bersama Anda</em>.</h1>
+      <p class="lead">
+        Kelola tabungan, deposito, kartu kredit, dan asuransi dalam satu aplikasi.
+        Buka rekening dalam 5 menit, tanpa datang ke kantor cabang.
+      </p>
+      <div class="hero__ctas">
+        <a class="btn btn--gold" href="{{ url_for('auth.register') }}">Buka Rekening Online</a>
+        <a class="btn btn--light" href="#produk">Lihat Produk</a>
+      </div>
+      <div class="hero__stats">
+        <div class="hero__stat"><strong>2,4 juta</strong><span>nasabah (simulasi)</span></div>
+        <div class="hero__stat"><strong>Rp 18,7 T</strong><span>dana kelolaan</span></div>
+        <div class="hero__stat"><strong>99,98%</strong><span>uptime layanan</span></div>
+      </div>
+    </div>
+
+    <div class="hero__panel">
+      {# Sign-in greeting populated from the URL fragment by app.js. #}
+      <p id="dom-greeting" class="hero__greeting" aria-live="polite"></p>
+      <div class="mini-card">
+        <div class="mini-card__label">Saldo Tabungan</div>
+        <div class="mini-card__balance">Rp 24.850.000</div>
+        <div class="mini-card__row">
+          <span>•••• •••• •••• 4821</span>
+          <span>NusaCard Debit</span>
+        </div>
+      </div>
+      <div class="stack">
+        <div class="row-item"><span>Transfer ke BCA • Budi</span><span>− Rp 750.000</span></div>
+        <div class="row-item"><span>Gaji November</span><span>+ Rp 9.200.000</span></div>
+        <div class="row-item"><span>Bayar listrik PLN</span><span>− Rp 412.300</span></div>
+      </div>
+      <p class="small hero__note">
+        Tampilan contoh. Data pada aplikasi lab sepenuhnya fiktif.
+      </p>
+    </div>
+  </div>
+</section>
+
+<section class="section" id="produk">
+  <div class="container">
+    <div class="section__head">
+      <span class="kicker">Produk Kami</span>
+      <h2>Satu aplikasi untuk seluruh kebutuhan keuangan</h2>
+      <p>Pilih produk yang sesuai dengan tujuan Anda. Semua simpanan dijamin LPS hingga
+         Rp 2 miliar (ketentuan simulasi).</p>
+    </div>
+    <div class="grid grid--3">
+      {% for slug, p in products.items() %}
+      <article class="card">
+        <div class="card__icon">{{ p.name[0] }}</div>
+        <h3>{{ p.name }}</h3>
+        <p>{{ p.rate }}</p>
+        {% if slug in ('tabungan', 'deposito') %}
+          <a class="btn btn--ghost btn--sm mt-2" href="{{ url_for('auth.register') }}">Ajukan sekarang</a>
+        {% else %}
+          <a class="btn btn--ghost btn--sm mt-2" href="{{ url_for('auth.login') }}">Info lebih lanjut</a>
+        {% endif %}
+      </article>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+
+<section class="section section--tint" id="keamanan">
+  <div class="container">
+    <div class="section__head">
+      <span class="kicker">Keamanan</span>
+      <h2>Keamanan berlapis untuk dana Anda</h2>
+      <p>Kami menerapkan enkripsi, PIN transaksi, dan pemantauan transaksi 24 jam.</p>
+    </div>
+    <div class="grid grid--4">
+      <div class="card">
+        <div class="card__icon">🔒</div>
+        <h3>Enkripsi</h3>
+        <p>Data sensitif dienkripsi saat disimpan maupun dikirim.</p>
+      </div>
+      <div class="card">
+        <div class="card__icon">🛡️</div>
+        <h3>PIN Transaksi</h3>
+        <p>Setiap transfer wajib dikonfirmasi dengan PIN 6 digit.</p>
+      </div>
+      <div class="card">
+        <div class="card__icon">👁️</div>
+        <h3>Pemantauan 24/7</h3>
+        <p>Sistem mendeteksi aktivitas mencurigakan secara otomatis.</p>
+      </div>
+      <div class="card">
+        <div class="card__icon">📞</div>
+        <h3>Bantuan Cepat</h3>
+        <p>Tim layanan tersedia melalui tiket di dalam aplikasi.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section" id="tentang">
+  <div class="container">
+    <div class="grid grid--2">
+      <div>
+        <span class="kicker">Tentang NusaBank</span>
+        <h2>Bank digital yang dibangun untuk generasi baru</h2>
+        <p class="muted">
+          NusaBank adalah lembaga keuangan fiktif yang dibuat untuk pelatihan keamanan
+          aplikasi web. Seluruh nama, nomor rekening, dan transaksi di dalamnya adalah
+          data palsu yang dihasilkan secara acak.
+        </p>
+        <ul class="feature-list mt-2">
+          <li>Buka rekening 100% online</li>
+          <li>Transfer antar bank real-time</li>
+          <li>Asuransi jiwa &amp; kendaraan terintegrasi</li>
+          <li>API perbankan untuk kebutuhan integrasi</li>
+        </ul>
+      </div>
+      <div class="stat-strip stat-strip--2">
+        <div class="stat"><strong>30</strong><span>nasabah dummy</span></div>
+        <div class="stat"><strong>3</strong><span>akun administrator</span></div>
+        <div class="stat"><strong>12 bulan</strong><span>riwayat transaksi</span></div>
+        <div class="stat"><strong>39</strong><span>skenario celah latihan</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section" id="faq">
+  <div class="container">
+    <div class="section__head">
+      <span class="kicker">Bantuan</span>
+      <h2>Pertanyaan yang sering diajukan</h2>
+    </div>
+    <div class="grid grid--2">
+      <div class="card">
+        <h3>Bagaimana cara membuka rekening?</h3>
+        <p>Klik "Buka Rekening Online", lengkapi data diri, lalu unggah dokumen KYC.</p>
+      </div>
+      <div class="card">
+        <h3>Apakah ada biaya administrasi?</h3>
+        <p>Tabungan Nusa Prima bebas biaya administrasi bulanan.</p>
+      </div>
+      <div class="card">
+        <h3>Berapa limit transfer harian?</h3>
+        <p>Limit default Rp 25.000.000 per hari dan dapat diubah melalui cabang.</p>
+      </div>
+      <div class="card">
+        <h3>Bagaimana jika PIN terkunci?</h3>
+        <p>Ajukan tiket bantuan melalui menu Pengaduan di dashboard.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section section--tint" id="kontak">
+  <div class="container">
+    <div class="grid grid--2">
+      <div>
+        <span class="kicker">Hubungi Kami</span>
+        <h2>Ada pertanyaan? Tim kami siap membantu.</h2>
+        <p class="muted">Senin–Jumat, 08.00–20.00 WIB. Akhir pekan 09.00–17.00 WIB.</p>
+      </div>
+      <div class="card">
+        <p><strong>Telepon:</strong> 1500-800 (bebas pulsa)</p>
+        <p><strong>Email:</strong> care@nusabank.example.com</p>
+        <p><strong>Kantor Pusat:</strong> Jl. Contoh Raya No. 1, Jakarta Selatan</p>
+        <p class="mb-0"><strong>WhatsApp:</strong> 0812-0000-0000</p>
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %}

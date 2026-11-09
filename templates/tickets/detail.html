@@ -1,0 +1,86 @@
+{% extends "base.html" %}
+{% block title %}Tiket {{ ticket.ticket_no }}{% endblock %}
+
+{% block content %}
+<section class="section-tight">
+  <div class="container">
+    <div class="page-head">
+      <div>
+        <h1>{{ ticket.subject }}</h1>
+        <p class="muted">
+          <span class="mono">{{ ticket.ticket_no }}</span> ·
+          {{ ticket.full_name }} · dibuka {{ ticket.created_at|tanggal }}
+        </p>
+      </div>
+      <div class="pill-row">
+        <span class="badge {{ 'badge--green' if ticket.status == 'closed' else ('badge--amber' if ticket.status == 'in_progress' else '') }}">
+          {{ status_labels.get(ticket.status, ticket.status) }}
+        </span>
+        <a class="btn btn--ghost btn--sm" href="{{ url_for('tickets.index') }}">Kembali</a>
+      </div>
+    </div>
+
+    <div class="grid grid--2">
+      <div>
+        {% for c in comments %}
+          <div class="comment {{ 'comment--internal' if c.is_internal }}">
+            <div class="comment__head">
+              <strong>{{ c.author_name or 'Admin' }}</strong>
+              {% if c.is_internal %}
+                {# VULN: internal_note_exposure — agent-only notes shown to the
+                   ticket owner on easy/medium. #}
+                <span class="badge badge--gold">catatan internal</span>
+              {% endif %}
+              <span class="small muted">{{ c.created_at|tanggal }}</span>
+            </div>
+            <div class="comment__body">
+              {% if xss_stored %}
+                {# VULN: ticket_xss — comment bodies rendered unescaped. #}
+                {{ c.body|safe }}
+              {% else %}
+                {{ c.body }}
+              {% endif %}
+            </div>
+          </div>
+        {% endfor %}
+
+        {% if ticket.status != 'closed' %}
+          <div class="card mt-2">
+            <h3>Balas</h3>
+            <form method="post" action="{{ url_for('tickets.comment', ticket_id=ticket.id) }}">
+              <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+              <div class="form-group">
+                <label class="form-label" for="body">Pesan</label>
+                <textarea class="form-control" id="body" name="body" rows="4" required></textarea>
+              </div>
+              {% if active_user.role is defined and active_user.role.startswith('admin') %}
+                <label class="check">
+                  <input type="checkbox" name="is_internal" value="1"> Catatan internal (tidak terlihat nasabah)
+                </label>
+              {% endif %}
+              <button class="btn btn--primary btn--sm mt-1" type="submit">Kirim balasan</button>
+            </form>
+          </div>
+        {% else %}
+          <div class="notice mt-2">Tiket ini sudah ditutup.</div>
+        {% endif %}
+      </div>
+
+      <div class="card">
+        <h3>Informasi tiket</h3>
+        <dl class="detail-grid">
+          <div><dt>Kategori</dt><dd>{{ ticket.category }}</dd></div>
+          <div><dt>Prioritas</dt><dd>{{ ticket.priority }}</dd></div>
+          <div><dt>Status</dt><dd>{{ status_labels.get(ticket.status, ticket.status) }}</dd></div>
+          <div><dt>Pemohon</dt><dd>{{ ticket.username }}</dd></div>
+          <div><dt>Dibuat</dt><dd>{{ ticket.created_at }}</dd></div>
+          <div><dt>Diperbarui</dt><dd>{{ ticket.updated_at }}</dd></div>
+        </dl>
+        <div class="notice mt-2">
+          Jangan pernah membagikan PIN, password, atau kode OTP pada tiket.
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %}

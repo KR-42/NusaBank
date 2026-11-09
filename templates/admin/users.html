@@ -1,0 +1,72 @@
+{% extends "admin/_layout.html" %}
+{% block title %}Nasabah{% endblock %}
+{% block admin_subtitle %}Pencarian dan pengelolaan data nasabah.{% endblock %}
+
+{% block admin_content %}
+<div class="card">
+  <form method="get" class="flex gap-1">
+    <input class="form-control" name="q" value="{{ q }}" placeholder="Cari username, nama, atau email">
+    <select class="form-control" name="status">
+      <option value="">Semua status KYC</option>
+      {% for item in statuses %}
+        <option value="{{ item }}" {% if item == status %}selected{% endif %}>{{ item }}</option>
+      {% endfor %}
+    </select>
+    <button class="btn btn--primary btn--sm" type="submit">Cari</button>
+  </form>
+
+  {% if error %}
+    <div class="notice notice--danger mt-2">{{ error }}</div>
+  {% endif %}
+
+  <div class="table-wrap mt-2">
+    <table class="data">
+      <thead>
+        <tr>
+          <th>ID</th><th>Nasabah</th><th>Role</th><th>KYC</th>
+          <th class="text-right">Rekening</th><th class="text-right">Saldo</th><th></th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for row in rows %}
+          <tr>
+            <td class="mono small">{{ row.id }}</td>
+            <td>
+              <strong>{{ row.full_name }}</strong><br>
+              <span class="small muted">{{ row.username }} · {{ row.email }}</span>
+            </td>
+            <td><span class="badge {{ 'badge--gold' if row.role.startswith('admin') }}">{{ row.role }}</span></td>
+            <td>
+              <span class="badge {{ 'badge--green' if row.kyc_status == 'verified' else ('badge--red' if row.kyc_status == 'rejected' else 'badge--amber') }}">
+                {{ row.kyc_status }}
+              </span>
+              {% if not row.is_active %}<span class="badge badge--red">nonaktif</span>{% endif %}
+            </td>
+            <td class="text-right">{{ row.account_count }}</td>
+            <td class="text-right amount--in">{{ row.total_balance|rupiah }}</td>
+            <td class="text-right">
+              <a class="small" href="{{ url_for('admin.user_detail', user_id=row.id) }}">Kelola</a>
+            </td>
+          </tr>
+        {% else %}
+          <tr><td colspan="7" class="muted">Tidak ada nasabah yang cocok.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  {% if page.pages > 1 %}
+    <nav class="pager mt-2" aria-label="Navigasi halaman">
+      {% if page.page > 1 %}
+        <a class="btn btn--ghost btn--sm"
+           href="{{ url_for('admin.users', q=q, status=status, page=page.page - 1) }}">← Sebelumnya</a>
+      {% endif %}
+      <span class="small muted">Halaman {{ page.page }} dari {{ page.pages }} ({{ page.total }} baris)</span>
+      {% if page.page < page.pages %}
+        <a class="btn btn--ghost btn--sm"
+           href="{{ url_for('admin.users', q=q, status=status, page=page.page + 1) }}">Berikutnya →</a>
+      {% endif %}
+    </nav>
+  {% endif %}
+</div>
+{% endblock %}

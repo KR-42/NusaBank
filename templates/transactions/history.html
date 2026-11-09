@@ -1,0 +1,135 @@
+{% extends "base.html" %}
+{% block title %}Riwayat Transaksi{% endblock %}
+
+{% block content %}
+<section class="section-tight">
+  <div class="container">
+    <div class="page-head">
+      <div>
+        <h1>Riwayat transaksi</h1>
+        <p class="muted">Filter berdasarkan kata kunci dan rentang tanggal.</p>
+      </div>
+      <a class="btn btn--primary btn--sm" href="{{ url_for('transactions.transfer') }}">Transfer</a>
+    </div>
+
+    {% if xss_reflected and reflected_q %}
+      {# VULN: xss_reflected — the search term is rendered without escaping. #}
+      <div class="notice">
+        Hasil pencarian untuk: <strong>{{ reflected_q|safe }}</strong>
+      </div>
+    {% endif %}
+
+    <div class="card">
+      <form method="get" class="grid grid--4 filter-grid">
+        <div class="form-group">
+          <label class="form-label" for="account_id">Rekening</label>
+          <select class="form-control" id="account_id" name="account_id">
+            {% for account in accounts %}
+              <option value="{{ account.id }}"
+                      {% if account.id|string == account_id|string %}selected{% endif %}>
+                {{ account.account_number }} — {{ account.label }}
+              </option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="q">Kata kunci</label>
+          <input class="form-control" id="q" name="q" value="{{ q }}"
+                 placeholder="deskripsi / lawan / ref">
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="start">Dari tanggal</label>
+          <input class="form-control" id="start" name="start" type="date" value="{{ start }}">
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="end">Sampai tanggal</label>
+          <input class="form-control" id="end" name="end" type="date" value="{{ end }}">
+        </div>
+        <div class="form-actions flex gap-1 filter-actions">
+          <button class="btn btn--primary btn--sm" type="submit">Terapkan filter</button>
+          <a class="btn btn--ghost btn--sm"
+             href="{{ url_for('transactions.history', account_id=account_id) }}">Reset</a>
+          <a class="btn btn--ghost btn--sm"
+             href="{{ url_for('transactions.export_csv', account_id=account_id, q=q, start=start, end=end) }}">
+            Ekspor CSV
+          </a>
+        </div>
+      </form>
+    </div>
+
+    <div class="grid grid--3 mt-2">
+      <div class="card stat">
+        <strong>{{ total_count }}</strong><span>transaksi cocok</span>
+      </div>
+      <div class="card stat">
+        <strong class="amount--in">{{ total_in|rupiah }}</strong><span>dana masuk</span>
+      </div>
+      <div class="card stat">
+        <strong class="amount--out">{{ total_out|rupiah }}</strong><span>dana keluar</span>
+      </div>
+    </div>
+
+    <div class="table-wrap mt-2">
+      <table class="data">
+        <thead>
+          <tr>
+            <th>Tanggal</th>
+            <th>Deskripsi</th>
+            <th>Lawan</th>
+            <th class="text-right">Nominal</th>
+            <th class="text-right">Saldo</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for tx in rows %}
+            <tr>
+              <td class="small muted">{{ tx.created_at|tanggal }}</td>
+              <td>
+                {% if xss_stored %}
+                  {# VULN: xss_stored — stored description rendered unescaped. #}
+                  <strong>{{ tx.description|safe }}</strong>
+                {% else %}
+                  <strong>{{ tx.description }}</strong>
+                {% endif %}
+                <br><span class="small muted mono">{{ tx.ref_no }}</span>
+              </td>
+              <td class="small">
+                {{ tx.counterparty_name or '-' }}<br>
+                <span class="mono muted">{{ tx.counterparty_account or '' }}</span>
+              </td>
+              <td class="text-right {{ 'amount--in' if tx.direction == 'IN' else 'amount--out' }}">
+                {{ '+' if tx.direction == 'IN' else '−' }}{{ tx.amount|rupiah }}
+              </td>
+              <td class="text-right small">{{ tx.balance_after|rupiah }}</td>
+              <td class="text-right">
+                <a class="small" href="{{ url_for('transactions.detail', tx_id=tx.id) }}">Detail</a>
+              </td>
+            </tr>
+          {% else %}
+            <tr><td colspan="6" class="muted">Tidak ada transaksi untuk filter ini.</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+
+    {% if page.pages > 1 %}
+      <nav class="pager mt-2" aria-label="Navigasi halaman">
+        {% if page.page > 1 %}
+          <a class="btn btn--ghost btn--sm"
+             href="{{ url_for('transactions.history', account_id=account_id, q=q, start=start, end=end, page=page.page - 1) }}">
+            ← Sebelumnya
+          </a>
+        {% endif %}
+        <span class="small muted">Halaman {{ page.page }} dari {{ page.pages }}</span>
+        {% if page.page < page.pages %}
+          <a class="btn btn--ghost btn--sm"
+             href="{{ url_for('transactions.history', account_id=account_id, q=q, start=start, end=end, page=page.page + 1) }}">
+            Berikutnya →
+          </a>
+        {% endif %}
+      </nav>
+    {% endif %}
+  </div>
+</section>
+{% endblock %}

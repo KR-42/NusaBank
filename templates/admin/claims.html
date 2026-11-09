@@ -1,0 +1,76 @@
+{% extends "admin/_layout.html" %}
+{% block title %}Klaim Asuransi{% endblock %}
+{% block admin_subtitle %}Tinjau klaim asuransi yang diajukan nasabah.{% endblock %}
+
+{% block admin_content %}
+<div class="stat-strip">
+  {% for row in totals %}
+    <div class="stat">
+      <strong>{{ row.n }}</strong>
+      <span>{{ row.status }} · {{ row.total|rupiah }}</span>
+    </div>
+  {% endfor %}
+</div>
+
+<div class="card mt-3">
+  <div class="pill-row">
+    {% for item in statuses %}
+      <a class="btn btn--sm {{ 'btn--primary' if item == status else 'btn--ghost' }}"
+         href="{{ url_for('admin.claims', status=item) }}">{{ item }}</a>
+    {% endfor %}
+  </div>
+
+  <div class="table-wrap mt-2">
+    <table class="data">
+      <thead>
+        <tr><th>No. Klaim</th><th>Nasabah</th><th>Polis</th><th class="text-right">Nominal</th>
+            <th>Lampiran</th><th>Keputusan</th></tr>
+      </thead>
+      <tbody>
+        {% for claim in rows %}
+          <tr>
+            <td>
+              <strong class="mono">{{ claim.claim_no }}</strong><br>
+              <span class="small muted">{{ claim.created_at|tanggal }}</span>
+            </td>
+            <td>
+              {{ claim.full_name }}<br>
+              <span class="small muted">{{ claim.username }}</span>
+            </td>
+            <td>
+              <span class="mono small">{{ claim.policy_no }}</span><br>
+              <span class="small muted">{{ claim.product }} · perlindungan {{ claim.coverage|rupiah }}</span>
+            </td>
+            <td class="text-right">
+              {{ claim.amount|rupiah }}<br>
+              <span class="small muted">{{ claim.status }}</span>
+            </td>
+            <td class="small">
+              {% if claim.attachment %}
+                <a href="{{ url_for('admin.claim_attachment', claim_id=claim.id) }}">Unduh</a>
+              {% else %}—{% endif %}
+              <br><span class="muted">{{ (claim.description or '')[:60] }}</span>
+            </td>
+            <td>
+              {% if can_review %}
+                <form method="post" action="{{ url_for('admin.claim_review', claim_id=claim.id) }}" class="flex gap-1">
+                  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                  <input type="hidden" name="status" value="{{ status }}">
+                  <input class="form-control" name="note" placeholder="Catatan" style="min-width:140px">
+                  <button class="btn btn--primary btn--sm" type="submit" name="decision" value="approved">Setujui</button>
+                  <button class="btn btn--ghost btn--sm" type="submit" name="decision" value="rejected">Tolak</button>
+                </form>
+              {% else %}
+                <span class="small muted">Hanya untuk tim klaim.</span>
+              {% endif %}
+              {% if claim.admin_note %}<br><span class="small muted">{{ claim.admin_note }}</span>{% endif %}
+            </td>
+          </tr>
+        {% else %}
+          <tr><td colspan="6" class="muted">Tidak ada klaim berstatus {{ status }}.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

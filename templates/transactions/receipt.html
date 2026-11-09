@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Struk {{ tx.ref_no }} — NusaBank</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body class="receipt-page">
+  <div class="receipt-shell">
+    <div class="receipt-actions">
+      <button class="btn btn--ghost btn--sm" type="button" data-print>Cetak</button>
+      <a class="btn btn--ghost btn--sm" href="{{ url_for('transactions.detail', tx_id=tx.id) }}">Kembali</a>
+    </div>
+
+    <div class="receipt">
+      <div class="receipt__head">
+        <div>
+          <div class="receipt__brand">Nusa<span>Bank</span></div>
+          <div class="receipt__muted">Bukti transaksi elektronik</div>
+        </div>
+        <div class="receipt__meta">
+          <div class="receipt__muted">Referensi</div>
+          <div class="receipt__ref">{{ tx.ref_no }}</div>
+          <div class="receipt__muted">{{ tx.created_at }}</div>
+        </div>
+      </div>
+
+      <div class="receipt__muted">Nominal</div>
+      <div class="receipt__amount">{{ tx.amount|rupiah }}</div>
+      <div class="receipt__muted">
+        {{ 'Dana masuk' if tx.direction == 'IN' else 'Dana keluar' }} ·
+        Status {{ tx.status|upper }}
+      </div>
+
+      <table>
+        <tr><th>Rekening</th><td class="mono">{{ account.account_number }}</td></tr>
+        <tr><th>Nama pemilik</th><td>{{ owner.full_name }}</td></tr>
+        <tr><th>Lawan transaksi</th><td>{{ tx.counterparty_name or '-' }}</td></tr>
+        <tr><th>Rekening lawan</th><td class="mono">{{ tx.counterparty_account or '-' }}</td></tr>
+        <tr><th>Jenis</th><td>{{ tx.tx_type }}</td></tr>
+        <tr><th>Berita</th><td>
+          {% if xss_stored %}
+            {# VULN: xss_stored — stored description rendered unescaped. #}
+            {{ tx.description|safe }}
+          {% else %}
+            {{ tx.description }}
+          {% endif %}
+        </td></tr>
+        <tr><th>Saldo setelah transaksi</th><td>{{ tx.balance_after|rupiah }}</td></tr>
+      </table>
+
+      <div class="receipt__foot">
+        Dokumen ini dibuat otomatis oleh sistem NusaBank (fiktif) dan sah tanpa tanda tangan.
+        Simpan sebagai bukti transaksi. Pertanyaan: 1500-123 atau halo@nusabank.example.com.
+        <div class="receipt__flag">LAB-NOTE: {{ lab_level|upper }} · {{ lab_level_text }}</div>
+      </div>
+    </div>
+  </div>
+
+  <script src="{{ url_for('static', filename='js/app.js') }}" defer></script>
+</body>
+</html>

@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+{% block title %}Masuk{% endblock %}
+
+{% block content %}
+<section class="auth-shell">
+  <div class="auth-card">
+    <h1>Masuk ke NusaBank</h1>
+    <p class="sub">Gunakan username dan password akun Anda.</p>
+
+    <form method="post" autocomplete="on" novalidate>
+      <input type="hidden" name="next" value="{{ next_url or '' }}">
+      <div class="form-group">
+        <label class="form-label" for="username">Username</label>
+        <input class="form-control" id="username" name="username" required
+               value="{{ username or '' }}" autofocus>
+      </div>
+      <div class="form-group">
+        <label class="form-label" for="password">Password</label>
+        <input class="form-control" id="password" name="password" type="password" required>
+      </div>
+      <div class="form-group flex justify-between items-center">
+        <label class="form-check">
+          <input type="checkbox" name="remember" value="1"> Ingat saya
+        </label>
+        <a class="small" href="{{ url_for('auth.forgot_password') }}">Lupa password?</a>
+      </div>
+      <button class="btn btn--primary btn--block" type="submit">Masuk</button>
+    </form>
+
+    <div class="divider">atau</div>
+    <p class="small text-center mb-0">
+      Belum punya rekening?
+      <a href="{{ url_for('auth.register') }}">Buka rekening online</a>
+    </p>
+  </div>
+</section>
+{% endblock %}

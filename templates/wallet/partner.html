@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+{% block title %}Mitra E-Wallet{% endblock %}
+
+{% block content %}
+<section class="section-tight">
+  <div class="container container--narrow">
+    <div class="page-head">
+      <div>
+        <h1>Partner Callback — DompetKu</h1>
+        <p class="muted">Halaman mitra tiruan yang menerima webhook dari NusaBank.</p>
+      </div>
+    </div>
+
+    {% if args %}
+      <div class="card">
+        <h3>Permintaan diterima</h3>
+        <dl class="detail-grid mt-1">
+          <div><dt>Event</dt><dd class="mono">{{ args.get('event', '-') }}</dd></div>
+          <div><dt>Webhook ID</dt><dd class="mono">{{ args.get('webhook_id', '-') }}</dd></div>
+          <div><dt>Timestamp</dt><dd class="mono">{{ args.get('ts', '-') }}</dd></div>
+          <div><dt>Tanda tangan</dt>
+            <dd>
+              {% if signature_ok is none %}
+                <span class="badge badge--amber" data-signature="none">tidak dikirim</span>
+              {% elif signature_ok %}
+                <span class="badge badge--green" data-signature="valid">valid</span>
+              {% else %}
+                <span class="badge badge--red" data-signature="invalid">tidak valid</span>
+              {% endif %}
+            </dd>
+          </div>
+        </dl>
+        {% if provided %}
+          <p class="small muted mono">sig={{ provided }}</p>
+        {% endif %}
+      </div>
+    {% else %}
+      <div class="notice">
+        Endpoint mitra siap. Daftarkan URL halaman ini sebagai webhook e-wallet dari
+        menu <a href="{{ url_for('webhook.index') }}">E-Wallet</a>.
+      </div>
+    {% endif %}
+
+    <p class="small muted mt-3">
+      Pada level <strong>hard</strong> dan <strong>patched</strong>, NusaBank menandatangani
+      parameter dengan HMAC-SHA256 sehingga mitra dapat menolak permintaan palsu.
+    </p>
+  </div>
+</section>
+{% endblock %}

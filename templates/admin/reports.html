@@ -1,0 +1,40 @@
+{% extends "admin/_layout.html" %}
+{% block title %}Laporan{% endblock %}
+{% block admin_subtitle %}Ekspor data operasional dalam format CSV.{% endblock %}
+
+{% block admin_content %}
+<div class="stat-strip">
+  <div class="stat"><strong>{{ summary.users }}</strong><span>Akun pengguna</span></div>
+  <div class="stat"><strong>{{ summary.accounts }}</strong><span>Rekening</span></div>
+  <div class="stat"><strong>{{ summary.balance|rupiah }}</strong><span>Total saldo</span></div>
+  <div class="stat"><strong>{{ summary.transactions }}</strong><span>Transaksi</span></div>
+</div>
+
+<div class="grid grid--3 mt-3">
+  <div class="card">
+    <h3>Data nasabah</h3>
+    <p class="small muted">Profil, role, status KYC, dan total saldo per nasabah.</p>
+    <a class="btn btn--primary btn--sm" href="{{ url_for('admin.reports_export', type='users') }}">Unduh CSV</a>
+  </div>
+  <div class="card">
+    <h3>Klaim asuransi</h3>
+    <p class="small muted">{{ summary.claims_pending }} klaim masih menunggu keputusan.</p>
+    <a class="btn btn--primary btn--sm" href="{{ url_for('admin.reports_export', type='claims') }}">Unduh CSV</a>
+  </div>
+  <div class="card">
+    <h3>Audit log</h3>
+    <p class="small muted">2.000 catatan audit terakhir untuk keperluan forensik.</p>
+    <a class="btn btn--primary btn--sm" href="{{ url_for('admin.reports_export', type='audit') }}">Unduh CSV</a>
+  </div>
+</div>
+
+<div class="card mt-3">
+  <h3>Ekspor transaksi</h3>
+  <p class="small muted">
+    Ekspor mengikuti filter yang aktif di halaman transaksi. Buka
+    <a href="{{ url_for('admin.transactions') }}">halaman transaksi</a> untuk memilih
+    rentang tanggal atau nasabah terlebih dahulu.
+  </p>
+  <a class="btn btn--ghost btn--sm" href="{{ url_for('admin.transactions_export') }}">Unduh semua transaksi</a>
+</div>
+{% endblock %}

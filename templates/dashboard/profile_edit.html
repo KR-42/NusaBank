@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+{% block title %}Ubah Profil{% endblock %}
+
+{% block content %}
+<section class="section-tight">
+  <div class="container">
+    <div class="page-head">
+      <h1>Ubah profil</h1>
+      <p class="muted">Perubahan data diri dan kontak.</p>
+    </div>
+
+    <div class="auth-card auth-card--wide">
+      <form method="post" novalidate>
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <div class="form-group">
+          <label class="form-label" for="full_name">Nama lengkap</label>
+          <input class="form-control" id="full_name" name="full_name" required
+                 value="{{ form.full_name }}">
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label" for="email">Email</label>
+            <input class="form-control" id="email" name="email" type="email" required
+                   value="{{ form.email }}">
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="phone">No. HP</label>
+            <input class="form-control" id="phone" name="phone"
+                   value="{{ form.phone or '' }}">
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="address">Alamat</label>
+          <textarea class="form-control" id="address" name="address" rows="3">{{ form.address or '' }}</textarea>
+        </div>
+        <div class="form-actions">
+          <button class="btn btn--primary" type="submit">Simpan perubahan</button>
+          <a class="btn btn--ghost" href="{{ url_for('dashboard.profile') }}">Batal</a>
+        </div>
+      </form>
+    </div>
+  </div>
+</section>
+{% endblock %}

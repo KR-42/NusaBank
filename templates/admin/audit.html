@@ -1,0 +1,51 @@
+{% extends "admin/_layout.html" %}
+{% block title %}Audit Log{% endblock %}
+{% block admin_subtitle %}Jejak aktivitas sistem dan administrator.{% endblock %}
+
+{% block admin_content %}
+<div class="card">
+  <form method="get" class="flex gap-1">
+    <input class="form-control" name="q" value="{{ q }}" placeholder="Cari aktor, aksi, atau detail">
+    <select class="form-control" name="action">
+      <option value="">Semua aksi</option>
+      {% for item in actions %}
+        <option value="{{ item }}" {% if item == action %}selected{% endif %}>{{ item }}</option>
+      {% endfor %}
+    </select>
+    <button class="btn btn--primary btn--sm" type="submit">Filter</button>
+  </form>
+
+  <div class="table-wrap mt-2">
+    <table class="data">
+      <thead><tr><th>Waktu</th><th>Aktor</th><th>Aksi</th><th>Detail</th><th>IP</th></tr></thead>
+      <tbody>
+        {% for log in rows %}
+          <tr>
+            <td class="small muted">{{ log.created_at|tanggal }}</td>
+            <td class="small">{{ log.actor or '-' }}</td>
+            <td><span class="badge">{{ log.action }}</span></td>
+            <td class="small">{{ log.detail or '-' }}</td>
+            <td class="mono small">{{ log.ip or '-' }}</td>
+          </tr>
+        {% else %}
+          <tr><td colspan="5" class="muted">Belum ada catatan audit.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  {% if page.pages > 1 %}
+    <nav class="pager mt-2" aria-label="Navigasi halaman">
+      {% if page.page > 1 %}
+        <a class="btn btn--ghost btn--sm"
+           href="{{ url_for('admin.audit_log', q=q, action=action, page=page.page - 1) }}">← Sebelumnya</a>
+      {% endif %}
+      <span class="small muted">Halaman {{ page.page }} dari {{ page.pages }}</span>
+      {% if page.page < page.pages %}
+        <a class="btn btn--ghost btn--sm"
+           href="{{ url_for('admin.audit_log', q=q, action=action, page=page.page + 1) }}">Berikutnya →</a>
+      {% endif %}
+    </nav>
+  {% endif %}
+</div>
+{% endblock %}
