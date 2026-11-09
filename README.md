@@ -59,7 +59,7 @@ not on demo pages bolted on for the exercise.
 ### Docker (recommended)
 
 ```bash
-git clone <repo-url> && cd nusabank
+git clone https://github.com/KR-42/NusaBank.git && cd NusaBank
 
 # Default level: medium
 docker compose up --build
