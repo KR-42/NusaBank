@@ -41,7 +41,7 @@ def main(argv=None):
 
     if not os.path.exists(app.config["DB_PATH"]):
         print(f"[!] Database tidak ditemukan di {app.config['DB_PATH']}")
-        print("    Jalankan:  python scripts/setup.py\n")
+        print("    Jalankan:  python db/seed.py\n")
         sys.exit(1)
 
     _warn()

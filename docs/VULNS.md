@@ -700,14 +700,22 @@ LAB_LEVEL=easy docker compose up --build
 LAB_LEVEL=patched docker compose up --build
 ```
 
-Atau jalankan harness otomatis yang dipakai saat pengembangan:
+Atau jalankan suite verifikasi otomatis di folder `tests/`:
 
 ```bash
-python scripts/stage4_check.py   # transaksi, IDOR, race, PIN, XSS
-python scripts/stage5_check.py   # upload, KYC, klaim, tiket
-python scripts/stage6_check.py   # SSRF, JWT, CORS, rate limit
-python scripts/stage7_check.py   # panel admin
-python scripts/stage8_check.py   # halaman publik, kalkulator
+python tests/run_all.py            # semuanya, keempat level (~17 detik)
+python tests/run_all.py hard       # satu level saja
 ```
 
-Setiap skrip mencetak matriks hasil per level sehingga regresi langsung terlihat.
+| Modul | Cakupan |
+|---|---|
+| `tests/verify_transactions.py` | riwayat, CSV, IDOR, SQLi pencarian/tanggal, transfer, race condition |
+| `tests/verify_uploads_claims.py` | upload KYC, path traversal, validasi klaim, XSS tiket |
+| `tests/verify_ssrf_api.py` | SSRF webhook, JWT (`alg:none`, secret lemah), CORS, rate limit |
+| `tests/verify_admin.py` | kontrol akses admin, SQLi login, mass assignment, command injection |
+| `tests/verify_public_pages.py` | SQLi/XSS berita, CSRF formulir kontak, kalkulator |
+| `tests/run_all.py` | menjalankan seluruh modul lalu merangkum hasilnya |
+
+Setiap modul membandingkan perilaku tiap level dengan tabel ekspektasi dan keluar
+dengan kode non-zero saat ada ketidakcocokan, sehingga regresi langsung terlihat.
+Total 432 pemeriksaan di keempat level.

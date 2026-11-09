@@ -48,7 +48,7 @@ not on demo pages bolted on for the exercise.
 | 🎯 **48 centrally managed feature flags** | One matrix in `app/lab.py` decides how every feature behaves at every level. No scattered `if debug:` branches. |
 | 🔀 **Four levels, not two** | `easy` → everything open. `medium` → defences you can bypass. `hard` → one subtle flaw per module. `patched` → the secure reference. |
 | 🧭 **Annotated source** | Every vulnerable branch is marked `# VULN: <name>`, its secure twin `# FIX:` — grep them and compare side by side. |
-| 🧪 **Verification harnesses** | Five scripts in `scripts/` run the test matrix at every level so regressions show up immediately. |
+| 🧪 **Verification suite** | Five modules in `tests/` assert the expected behaviour of every level, so regressions fail loudly instead of silently. |
 | 🚢 **Hardened container** | Non-root, `read_only`, `cap_drop: ALL`, `no-new-privileges`, published only to `127.0.0.1:8080`. |
 | 📚 **Complete documentation** | A vulnerability catalogue, a step-by-step walkthrough, and a credentials/flag reference. |
 
@@ -263,7 +263,14 @@ nusabank/
 │   ├── seed.py                # 33 users, 60 accounts, 1,161 transactions
 │   └── nusabank.db            # ready-to-run database
 ├── uploads/                   # KYC documents & claim attachments (dummy data)
-├── scripts/                   # per-stage verification harnesses
+├── tests/                     # verification suite — one module per feature area
+│   ├── harness.py             # shared fixtures, level runner, pass/fail report
+│   ├── verify_transactions.py # history, IDOR, SQLi, transfers, race condition
+│   ├── verify_uploads_claims.py # KYC uploads, traversal, claims, tickets
+│   ├── verify_ssrf_api.py     # e-wallet webhook (SSRF), JWT, CORS, rate limiting
+│   ├── verify_admin.py        # back-office access control, SQLi, mass assignment
+│   ├── verify_public_pages.py # news, contact form, calculator, DOM sink
+│   └── run_all.py             # runs every module and summarises the result
 ├── docs/
 │   ├── VULNS.md               # flaw catalogue + OWASP + payloads + fixes
 │   ├── WALKTHROUGH.md         # step-by-step guide
@@ -312,20 +319,42 @@ lives — is in [`docs/CREDENTIALS.md`](docs/CREDENTIALS.md).
 
 ## 🧪 Automated Verification
 
-Each build stage has a harness that runs its scenarios at all four levels and prints
-a result matrix:
+The `tests/` suite asserts what each level is supposed to do — all 432 checks across
+the four levels must pass. Each module runs its scenarios on every level, compares the
+observed values against a declared expectation table, and exits non-zero on the first
+mismatch:
 
 ```bash
-python scripts/stage4_check.py   # auth, IDOR, transfers, XSS
-python scripts/stage5_check.py   # uploads, KYC, claims, tickets
-python scripts/stage6_check.py   # SSRF, JWT, CORS, rate limiting
-python scripts/stage7_check.py   # admin panel
-python scripts/stage8_check.py   # public pages & calculator
+python tests/run_all.py            # everything, all four levels (~17 s)
+python tests/run_all.py hard       # only one level
+python tests/verify_admin.py       # only one module
 ```
 
-They copy the database to a temporary directory, start a real loopback server (so
-SSRF actually leaves the process), and assert the expected behaviour. Useful as a
-regression suite when you fix a flaw or add a level.
+| Module | Covers |
+|---|---|
+| `verify_transactions.py` | History, CSV export, IDOR, search/date SQLi, transfers, race condition |
+| `verify_uploads_claims.py` | KYC uploads, path traversal, claim validation, ticket XSS |
+| `verify_ssrf_api.py` | Webhook SSRF, JWT (`alg:none`, weak secret), CORS, rate limiting |
+| `verify_admin.py` | Admin access control, login SQLi, mass assignment, command injection |
+| `verify_public_pages.py` | News SQLi/XSS, contact form CSRF, calculator tampering |
+
+Every level runs against a throwaway copy of `db/nusabank.db` and its own upload
+directory, so the suite never touches your lab data. The SSRF module starts a real
+loopback HTTP server, so the server-side fetch genuinely leaves the process. Sample
+output:
+
+```
+=== admin panel - access control, SQLi, mass assignment, RCE ===
+  easy      17 checks  ok
+  medium    17 checks  ok
+  hard      17 checks  ok
+  patched   17 checks  ok
+
+RESULT: 68/68 checks passed across 4 level(s)
+```
+
+Use it as a regression gate whenever you change the feature matrix, add a level, or
+fix a flaw — a mismatch tells you exactly which check broke at which level.
 
 ---
 

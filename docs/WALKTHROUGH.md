@@ -950,14 +950,13 @@ Jalankan semua payload di atas pada `LAB_LEVEL=patched`. Yang diharapkan:
 - JWT palsu → `401`; CORS hanya origin sendiri.
 - XSS → teks inert (autoescape) di semua konteks.
 
-Harness otomatis (dipakai saat pengembangan) mencetak matriks per level:
+Suite verifikasi otomatis di folder `tests/` mencetak hasil per level dan keluar
+dengan kode non-zero bila ada yang tidak sesuai:
 
 ```bash
-python scripts/stage4_check.py
-python scripts/stage5_check.py
-python scripts/stage6_check.py
-python scripts/stage7_check.py
-python scripts/stage8_check.py
+python tests/run_all.py            # semua modul, keempat level
+python tests/run_all.py hard       # satu level saja
+python tests/verify_admin.py       # satu modul saja
 ```
 
 ---
