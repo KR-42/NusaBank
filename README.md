@@ -308,18 +308,6 @@ Everything is synthetic: 30 customers at `@example.com`, 3 back-office accounts,
 20 tickets with comments, 12 news articles, and 14 KYC documents. No real person or
 institution appears anywhere in the data.
 
-```text
-Weak customers  budi01 / password        (PIN 123456)
-                ani02  / 123456
-                dewi03 / qwerty
-                eko04  / nusabank
-                fitri05/ admin123
-
-Back office     admin       / NusaAdmin!2024      role: admin
-                cs123       / NusaCS!2024         role: admin_cs
-                finance456  / NusaFinance!2024    role: admin_finance
-```
-
 The full list — including 25 accounts with strong passwords and where every flag
 lives — is in [`docs/CREDENTIALS.md`](docs/CREDENTIALS.md).
 
