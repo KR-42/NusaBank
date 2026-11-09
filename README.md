@@ -2,11 +2,11 @@
 
 # 🏦 NusaBank
 
-### A digital bank, built to be broken.
+### A fictional Indonesian bank, built to be broken.
 
-A full-stack, deliberately vulnerable **banking web application** for hands-on
-penetration-testing practice. Realistic flows, real bugs, four difficulty levels,
-and a secure reference implementation you can diff against line by line.
+A full-stack, deliberately vulnerable **Indonesian banking web application** for
+hands-on penetration-testing practice. Realistic flows, real bugs, four difficulty
+levels, and a secure reference implementation you can diff against line by line.
 
 <br>
 
@@ -14,6 +14,11 @@ and a secure reference implementation you can diff against line by line.
 ![Flask](https://img.shields.io/badge/Flask-3.0.3-000000?style=for-the-badge&logo=flask&logoColor=white)
 ![SQLite](https://img.shields.io/badge/SQLite-3-003B57?style=for-the-badge&logo=sqlite&logoColor=white)
 ![Docker](https://img.shields.io/badge/Docker-Compose-2496ED?style=for-the-badge&logo=docker&logoColor=white)
+
+<br>
+
+![Origin](https://img.shields.io/badge/made%20in-Indonesia%20%F0%9F%87%AE%F0%9F%87%A9-ce1126?style=for-the-badge)
+![Fictional](https://img.shields.io/badge/bank-entirely%20fictional-555?style=for-the-badge)
 
 <br>
 
@@ -31,6 +36,16 @@ and a secure reference implementation you can diff against line by line.
 > **This application is intentionally vulnerable. Never expose it to the internet.**
 > Run it only on your own machine or an isolated VM. All data is fictional — there
 > are no real customers, accounts, or credentials anywhere in this repository.
+
+> [!NOTE]
+> **NusaBank is a made-up Indonesian bank.** It is not affiliated with, endorsed by, or
+> connected to any real financial institution in Indonesia or anywhere else. Every
+> account, balance, and transaction is fiction generated for this lab.
+>
+> The point is to practise pentesting against **Indonesian-language banking flows** —
+> Rupiah formatting, KTP/NPWP KYC uploads, transfer receipts with `TRX-` references,
+> and a back-office panel that speaks Bahasa Indonesia. Everything you would test on a
+> real Indonesian banking app is here, with none of the legal risk of touching one.
 
 ---
 
@@ -284,9 +299,14 @@ nusabank/
 
 ## 🎭 Lab Data
 
+NusaBank is an **Indonesian** lab: the UI, receipts, error pages, and admin panel are
+all in Bahasa Indonesia, and the seeded records use Indonesian names, cities, phone
+numbers and KTP/NPWP document types.
+
 Everything is synthetic: 30 customers at `@example.com`, 3 back-office accounts,
 60 accounts, 1,161 transactions spread over 12 months, 15 policies, 10 claims,
-20 tickets with comments, 12 news articles, and 14 KYC documents.
+20 tickets with comments, 12 news articles, and 14 KYC documents. No real person or
+institution appears anywhere in the data.
 
 ```text
 Weak customers  budi01 / password        (PIN 123456)
@@ -389,6 +409,11 @@ Anything that must be written (database, uploads) lives on a separate volume.
 ---
 
 ## ⚠️ Disclaimer
+
+**NusaBank is not a real bank.** It is an original fictional brand created for this
+lab. It is not affiliated with, endorsed by, or connected to any bank, fintech, or
+financial institution in Indonesia or anywhere else, and no real customer data is
+present.
 
 This project exists for **education and security training**. The vulnerable code is
 intentional and documented. Use it only against your own instance on a local machine
